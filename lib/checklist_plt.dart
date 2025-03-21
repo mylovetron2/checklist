@@ -24,7 +24,6 @@ class _PLT_pageState extends State<PLT_page> {
 
   late Future<List<DetailCheckList>> futureTags;
   late Future<List<DanhMucMay>> futureDanhMucMay;
-
   // Map<String, List<String>> options = {'MPL 022': ['021293', '021219','011098'],
   //                                      'MPL 030': ['10024935'],
   //                                      'MPL 024':['020220','031353','Hunting SPS','LEE-509019'],
@@ -51,14 +50,28 @@ class _PLT_pageState extends State<PLT_page> {
         options[danhMucMay.tenMay]!.add(danhMucMay.serialNumber); // Add the serial number to the list
       }
 
-      print('Converted options: $options'); // Debugging output
+      //print('Converted options: $options'); // Debugging output
     });
   }).catchError((error) {
     print('Error converting futureDanhMucMay to options: $error');
   });
+ 
+  futureTags = getDetailCheckListById(widget.idDanhMucCheckList)
+    ..then((detailCheckList) {
+      print('Fetched futureTags: $detailCheckList'); // Debugging output
+    }).catchError((error) {
+      print('Error fetching futureTags: $error'); // Debugging output
+    });
+  
+  futureTags.then((detailCheckList) {
+    setState(() {
+      tags = detailCheckList.map((item) => item.serialNumber).toList();
+      print('Converted futureTags to tags: $tags'); // Debugging output
+    });
+  }).catchError((error) {
+    print('Error converting futureTags to tags: $error');
+  });
 
-
-//
     
   }
 
@@ -135,7 +148,7 @@ Future<List<DanhMucMay>> getDanhMucMayApi() async {
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
-      print(response.body);
+      //print(response.body);
       final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
 
       // Check if the response contains a "data" key
@@ -154,6 +167,34 @@ Future<List<DanhMucMay>> getDanhMucMayApi() async {
   }
 }
 
+Future<List<DetailCheckList>> getDetailCheckListById(String idDanhMucChecklist) async {
+  
+  final url = Uri.parse('http://10.0.2.2/checklist/api/detail_checklist_api.php');
+  final headers = {'Content-Type': 'application/json'};
+  final body = jsonEncode({'action': 'SELECT_BY_ID', 'id_danhmuc_checklist': idDanhMucChecklist});
+
+  try {
+    final response = await http.post(url, headers: headers, body: body);
+
+    if (response.statusCode == 200) {
+      //print(response.body);
+      final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+
+      // Check if the response contains a "data" key
+      if (jsonResponse.containsKey('data')) {
+        final List<dynamic> data = jsonResponse['data'];
+        return data.map((item) => DetailCheckList.fromJson(item as Map<String, dynamic>)).toList();
+      } else {
+        throw Exception('Invalid API response: Missing "data" key');
+      }
+    } else {
+      throw Exception('Failed to load data from API. Status code: ${response.statusCode}');
+    }
+  } catch (e) {
+    print('Error fetching data from API: $e');
+    return <DetailCheckList>[];
+  }
+}
 
 void callSelectInsertApi(String idDanhmucChecklist, List<String> tags) async {
   //print(tags);

@@ -33,48 +33,62 @@ class CustomListView extends StatelessWidget {
 
 Widget createViewItem(Checklist checklist, BuildContext context) {
   return Card(
-    elevation: 5,
-    margin: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+    elevation: 8,
+    margin: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
     shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: BorderRadius.circular(15),
     ),
     child: Container(
-      padding: EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Colors.deepOrangeAccent, Colors.orangeAccent],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(15),
+      ),
+      padding: EdgeInsets.all(12),
       child: ListTile(
-        contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        contentPadding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
         title: Text(
           checklist.well,
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            fontSize: 18,
+            fontSize: 20,
+            color: Colors.white,
           ),
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: 5),
+            SizedBox(height: 8),
             Text(
-              'Date: ${checklist.date}',
+                'Date: ${DateTime.parse(checklist.date).day}/${DateTime.parse(checklist.date).month}/${DateTime.parse(checklist.date).year}',
               style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[600],
+                fontSize: 16,fontWeight: FontWeight.bold,
+                color: Colors.white70,
               ),
             ),
             SizedBox(height: 5),
             Text(
               'Doghouse: ${checklist.doghouse}',
               style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[600],
+                fontSize: 16,fontWeight: FontWeight.bold,
+                color: Colors.white70,
               ),
             ),
           ],
         ),
-        trailing: Text(
-          checklist.id.toString(),
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey[600],
+        trailing: Container(
+          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(
+            Icons.checklist_rtl_sharp,
+            color: Colors.blueAccent,
+            size: 36,
           ),
         ),
       ),
@@ -119,8 +133,24 @@ class _DanhMuucCheckListState extends State<DanhMuucCheckList> {
           List<Checklist> checklists = snapshot.data!;
           return Scaffold(
             appBar: AppBar(
-              title: Text('Checklist'),
+              title: Text(
+              'Checklist',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 22,
+                color: Colors.white,
+              ),
+              ),
+              centerTitle: true,
+              backgroundColor: Colors.blueAccent,
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(
+                bottom: Radius.circular(0),
+              ),
+              ),
             ),
+            
             body: RefreshIndicator(
               onRefresh: () async {
               // Add your refresh logic here

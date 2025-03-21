@@ -13,11 +13,19 @@ class _ChecklistInsertFormState extends State<ChecklistInsertForm> {
   final _formKey = GlobalKey<FormState>();
   
   
-  final TextEditingController controllerDate = TextEditingController();
+  final TextEditingController controllerDate = TextEditingController();  
   final TextEditingController controllerWell = TextEditingController();
   final TextEditingController controllerDoghouse = TextEditingController();
-
-    void addData() {
+  
+   @override
+  void initState() {
+    super.initState();
+    DateTime now = DateTime.now();
+    controllerDate.text =
+      "${now.day.toString().padLeft(2, '0')}-${now.month.toString().padLeft(2, '0')}-${now.year}";
+ }
+    
+  void addData() {
     var url = Uri.parse("http://10.0.2.2/checklist/api/checklist_add.php");
 
     http.post(url, body: {
@@ -30,85 +38,119 @@ class _ChecklistInsertFormState extends State<ChecklistInsertForm> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Insert Checklist'),
-      ),
+     appBar: AppBar(
+              title: Text(
+              'New Checklist',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 22,
+                color: Colors.white,
+              ),
+              ),
+              centerTitle: true,
+              backgroundColor: Colors.blueAccent,
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(
+                bottom: Radius.circular(0),
+              ),
+              ),
+            ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
           child: Column(
-          children: <Widget>[
-            
-            TextFormField(
-              controller: controllerDate,
-              readOnly: true,
-              decoration: InputDecoration(
-              labelText: 'Date',
-              suffixIcon: Icon(Icons.calendar_today),
-              ),
-              onTap: () async {
-              DateTime? pickedDate = await showDatePicker(
-                context: context,
-                initialDate: DateTime.now(),
-                firstDate: DateTime(2000),
-                lastDate: DateTime(2101),
-              );
-              if (pickedDate != null) {
-                setState(() {
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              TextFormField(
+          controller: controllerDate,
+          readOnly: true,
+          decoration: InputDecoration(
+            labelText: 'Date',
+            suffixIcon: Icon(Icons.calendar_today),
+            border: OutlineInputBorder(),
+          ),
+          onTap: () async {
+            DateTime? pickedDate = await showDatePicker(
+              context: context,
+              initialDate: DateTime.now(),
+              firstDate: DateTime(2000),
+              lastDate: DateTime(2101),
+            );
+            if (pickedDate != null) {
+              setState(() {
                 controllerDate.text =
-                  "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
-                });
-              }
-              },
-            ),
-            
-                    
-            TextFormField(
-              controller: controllerWell,
-            decoration: InputDecoration(labelText: 'Well'),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
+              "${pickedDate.day.toString().padLeft(2, '0')}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.year}";
+              });
+            }
+          },
+              ),
+              SizedBox(height: 16),
+              TextFormField(
+          controller: controllerWell,
+          decoration: InputDecoration(
+            labelText: 'Well',
+            border: OutlineInputBorder(),
+          ),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
               return 'Please enter a well';
-              }
-              return null;
-            },
-            onSaved: (value) {
-              // Save the well value
-            },
-            ),
-            TextFormField(
-              controller: controllerDoghouse,
-            decoration: InputDecoration(labelText: 'Doghouse'),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
+            }
+            return null;
+          },
+              ),
+              SizedBox(height: 16),
+              TextFormField(
+          controller: controllerDoghouse,
+          decoration: InputDecoration(
+            labelText: 'Doghouse',
+            border: OutlineInputBorder(),
+          ),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
               return 'Please enter a doghouse';
-              }
-              return null;
-            },
-            onSaved: (value) {
-              // Save the doghouse value
-            },
-            ),
-            SizedBox(height: 20),
-            FloatingActionButton(
+            }
+            return null;
+          },
+              ),
+              SizedBox(height: 20),
+              Center(
+            child: ElevatedButton(
             onPressed: () {
-               {
              
-              // Handle the form submission logic here
               addData();
               Navigator.pop(
                 context,
-                MaterialPageRoute(builder: (context) => DanhMuucCheckList()),
+                MaterialPageRoute(
+                builder: (context) => DanhMuucCheckList(),
+                ),
               );
-              }
+              
             },
-            child: Text('Insert'),
-            ),]
-          
-          
+            style: ElevatedButton.styleFrom(
+              padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+              shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+              ),
+              backgroundColor: Colors.blueAccent,
+            ),
+            child: Text(
+              'Add',
+              style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              ),
+            ),
+            ),
+          ),
+              
+            ],
+          ),
+        ),
           
         ),
-                ),
-    ));
+    );
+    
   }
 }

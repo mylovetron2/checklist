@@ -166,54 +166,36 @@ class CurvedListItem extends StatelessWidget {
           onPressed: () {Navigator.pop(context);},
           icon: Icon(Icons.arrow_back, color: Colors.white),
         ),
-        actions: [
-          IconButton(
-            onPressed: () {
-              
-            },
-            icon: Icon(Icons.cloud_sync, color: Colors.white, size: 40.0),
-          ),
-        ],
+       
         bottom: PreferredSize(
-          preferredSize: Size.fromHeight(100),
+          preferredSize: Size.fromHeight(30),
             child: Container(
                margin: EdgeInsets.all(10),
-            //padding: EdgeInsets.only(left: 1.0),
-            // decoration: BoxDecoration(
-            //   color: Colors.orange,
-            //   borderRadius: BorderRadius.only(
-            //   topLeft: Radius.circular(20),
-            //   topRight: Radius.circular(20),
-            //   ),
-            // ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+           
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-              
               SizedBox(height: 5),
-                Align(
-                alignment: Alignment.centerLeft,
+              Align(
+                alignment: Alignment.center,
                 child: Text(
-                    '${DateTime.parse(date).day}/${DateTime.parse(date).month}/${DateTime.parse(date).year}',
-                  style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+                '${DateTime.parse(date).day}/${DateTime.parse(date).month}/${DateTime.parse(date).year}',
+                style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
                 ),
-                ),
-              
-              //SizedBox(height: 1),
-              Text(
-                '$well',
-                style: TextStyle(color: Colors.white, fontSize: 18),
               ),
-              //SizedBox(height: 5),
               Text(
-                '$doghouse',
-                style: TextStyle(color: Colors.white, fontSize: 18),
+                '-$well',
+                style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
               ),
-              
+              // Text(
+              //   '-$doghouse',
+              //   style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+              // ),
               ],
             ),
             ),
-          ),
+            ),
+          
        
       );
  }
