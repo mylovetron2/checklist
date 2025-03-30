@@ -97,7 +97,7 @@ Widget createViewItem(Checklist checklist, BuildContext context) {
 }
 
 Future<List<Checklist>> fetchCheckList() async {
-  final jsonEndpoint = 'http://10.0.2.2/checklist/api/checklist_get.php';
+  final jsonEndpoint = 'http://diavatly.com/checklist/api/checklist_get.php';
   final response = await http.get(Uri.parse(jsonEndpoint));
  print('Response status: ${response.statusCode}');
   print('Response body: ${response.body}');

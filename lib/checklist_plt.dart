@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:app_quanly_bomdau/content_widget.dart';
 import 'package:app_quanly_bomdau/model/danhmuc_may.dart';
 import 'package:app_quanly_bomdau/model/detail_checklist.dart';
@@ -143,7 +142,7 @@ class _PLT_pageState extends State<PLT_page> {
 
 
 Future<List<DanhMucMay>> getDanhMucMayApi() async {
-  final url = Uri.parse('http://10.0.2.2/checklist/api/danhmuc_may_api.php');
+  final url = Uri.parse('http://diavatly.com/checklist/api/danhmuc_may_api.php');
   try {
     final response = await http.get(url);
 
@@ -166,10 +165,37 @@ Future<List<DanhMucMay>> getDanhMucMayApi() async {
     return <DanhMucMay>[];
   }
 }
+Future<List<DanhMucMay>> getDanhMucMayApiWithParam(String param) async {
+  final url = Uri.parse('http://diavatly.com/checklist/api/danhmuc_may_api.php');
+  final headers = {'Content-Type': 'application/json'};
+  final body = jsonEncode({'param': param}); // Include the parameter in the request body
+
+  try {
+    final response = await http.post(url, headers: headers, body: body);
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+
+      // Check if the response contains a "data" key
+      if (jsonResponse.containsKey('data')) {
+        final List<dynamic> data = jsonResponse['data'];
+        return data.map((item) => DanhMucMay.fromJson(item as Map<String, dynamic>)).toList();
+      } else {
+        throw Exception('Invalid API response: Missing "data" key');
+      }
+    } else {
+      throw Exception('Failed to load data from API. Status code: ${response.statusCode}');
+    }
+  } catch (e) {
+    print('Error fetching data from API with parameter: $e');
+    return <DanhMucMay>[];
+  }
+}
+
 
 Future<List<DetailCheckList>> getDetailCheckListById(String idDanhMucChecklist) async {
   
-  final url = Uri.parse('http://10.0.2.2/checklist/api/detail_checklist_api.php');
+  final url = Uri.parse('http://diavatly.com/checklist/api/detail_checklist_api.php');
   final headers = {'Content-Type': 'application/json'};
   final body = jsonEncode({'action': 'SELECT_BY_ID', 'id_danhmuc_checklist': idDanhMucChecklist});
 
@@ -191,14 +217,14 @@ Future<List<DetailCheckList>> getDetailCheckListById(String idDanhMucChecklist) 
       throw Exception('Failed to load data from API. Status code: ${response.statusCode}');
     }
   } catch (e) {
-    print('Error fetching data from API: $e');
+    print('Error fetching data from API detail_checklist_api: $e');
     return <DetailCheckList>[];
   }
 }
 
 void callSelectInsertApi(String idDanhmucChecklist, List<String> tags) async {
   //print(tags);
-  final url = Uri.parse('http://10.0.2.2/checklist/api/temp_api.php');
+  final url = Uri.parse('http://diavatly.com/checklist/api/temp_api.php');
   final headers = {'Content-Type': 'application/json'};
   final body = jsonEncode({
     'action': 'SELECT_INSERT', // Specify the action

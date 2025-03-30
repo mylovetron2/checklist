@@ -26,7 +26,7 @@ class _ChecklistInsertFormState extends State<ChecklistInsertForm> {
  }
     
   void addData() {
-    var url = Uri.parse("http://10.0.2.2/checklist/api/checklist_add.php");
+    var url = Uri.parse("http://diavatly.com/checklist/api/checklist_add.php");
 
     http.post(url, body: {
       "date": controllerDate.text,
