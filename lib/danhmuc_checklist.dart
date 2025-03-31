@@ -97,15 +97,41 @@ Widget createViewItem(Checklist checklist, BuildContext context) {
 }
 
 Future<List<Checklist>> fetchCheckList() async {
-  final jsonEndpoint = 'http://diavatly.com/checklist/api/checklist_get.php';
-  final response = await http.get(Uri.parse(jsonEndpoint));
- print('Response status: ${response.statusCode}');
-  print('Response body: ${response.body}');
-  if (response.statusCode == 200) {
-    List<dynamic> data = json.decode(response.body);
-    return data.map((item) => Checklist.fromJson(item as Map<String, dynamic>)).toList();
-  } else {
-    throw Exception('Failed to load checklist');
+  final url =  Uri.parse('http://diavatly.com/checklist/api/danhmuc_checklist_api.php');
+  
+ ///print('Response status: ${response.statusCode}');
+  //print('Response body: ${response.body}');
+  
+  
+  
+  
+  // if (response.statusCode == 200) {
+  //   List<dynamic> data = json.decode(response.body);
+  //   return data.map((item) => Checklist.fromJson(item as Map<String, dynamic>)).toList();
+  // } else {
+  //   throw Exception('Failed to load checklist');
+  // }
+
+  //final url = Uri.parse('http://diavatly.com/checklist/api/danhmuc_may_api.php');
+  try {
+    final response = await http.get(url);
+    if (response.statusCode == 200) {
+      //print(response.body);
+      final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+
+      // Check if the response contains a "data" key
+      if (jsonResponse.containsKey('data')) {
+        final List<dynamic> data = jsonResponse['data'];
+        return data.map((item) => Checklist.fromJson(item as Map<String, dynamic>)).toList();
+      } else {
+        throw Exception('Invalid API response: Missing "data" key');
+      }
+    } else {
+      throw Exception('Failed to load data from API. Status code: ${response.statusCode}');
+    }
+  } catch (e) {
+    print('Error fetching data from API: $e');
+    return <Checklist>[];
   }
 }
 

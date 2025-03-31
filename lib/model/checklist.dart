@@ -13,10 +13,15 @@ class Checklist {
 
   factory Checklist.fromJson(Map<String, dynamic> json) {
     return Checklist(
-      id: json['id_danhmuc_checklist'],
-      date: json['date'],
-      well: json['well'],
-      doghouse: json['doghouse'],
+      id: json['id_danhmuc_checklist'].toString(), // Convert to String
+      date: json['date']?.toString() ?? '', // Convert to String, default to empty string if null
+      well: json['well']?.toString() ?? '', // Convert to String, default to empty string if null
+      doghouse: json['doghouse']?.toString() ?? '', // Convert to String, default to empty string if null
     );
+  }
+
+  @override
+  String toString() {
+    return 'Checklist(id: $id, date: $date, well: $well, doghouse: $doghouse)';
   }
 }
