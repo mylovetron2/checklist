@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:app_quanly_bomdau/checklist_insert.dart';
+import 'package:app_quanly_bomdau/danhmuc_loaimay.dart';
 import 'package:app_quanly_bomdau/model/checklist.dart';
 import 'package:app_quanly_bomdau/type_equipments.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +21,8 @@ class CustomListView extends StatelessWidget {
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => TypeEquipments(checklist: checklists[index],)),
+              //MaterialPageRoute(builder: (context) => TypeEquipments(checklist: checklists[index],)),
+              MaterialPageRoute(builder: (context) => DanhMucLoaiMayScreen(checklist: checklists[index],)),
             );
           },
           child: createViewItem(checklists[index], context),
@@ -97,7 +99,8 @@ Widget createViewItem(Checklist checklist, BuildContext context) {
 }
 
 Future<List<Checklist>> fetchCheckList() async {
-  final url =  Uri.parse('http://diavatly.com/checklist/api/danhmuc_checklist_api.php');
+  //final url =  Uri.parse('http://diavatly.com/checklist/api/danhmuc_checklist_api.php');
+  final url =  Uri.parse('https://us-central1-checklist-447fd.cloudfunctions.net/fetchCheckList');
   
  ///print('Response status: ${response.statusCode}');
   //print('Response body: ${response.body}');

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:app_quanly_bomdau/danhmuc_checklist.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -25,14 +27,42 @@ class _ChecklistInsertFormState extends State<ChecklistInsertForm> {
       "${now.day.toString().padLeft(2, '0')}-${now.month.toString().padLeft(2, '0')}-${now.year}";
  }
     
-  void addData() {
-    var url = Uri.parse("http://diavatly.com/checklist/api/checklist_add.php");
-
-    http.post(url, body: {
-      "date": controllerDate.text,
-      "well": controllerWell.text,
-      "doghouse": controllerDoghouse.text
-    });
+  void addData() async{
+    //var url = Uri.parse("http://diavatly.com/checklist/api/checklist_add.php");
+    var url = Uri.parse(
+      "https://us-central1-checklist-447fd.cloudfunctions.net/insertCheckListPostApi");
+    
+    // http.post(url, body: {
+    //   "date": controllerDate.text,
+    //   "well": controllerWell.text,
+    //   "doghouse": controllerDoghouse.text
+    // });
+    try {
+      final response = await http.post(
+        url,
+        body: {
+          "date": controllerDate.text,
+          "well": controllerWell.text,
+          "doghouse": controllerDoghouse.text
+        },
+      );
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Data added successfully')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to add data: ${response.reasonPhrase}')),
+        );
+      }
+        
+      
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('An error occurred: $e')),
+      );
+    }
+   
   }
 
   @override
@@ -154,3 +184,45 @@ class _ChecklistInsertFormState extends State<ChecklistInsertForm> {
     
   }
 }
+
+
+
+
+
+// void addData() async{
+//     //var url = Uri.parse("http://diavatly.com/checklist/api/checklist_add.php");
+//     var url = Uri.parse(
+//       "https://insertchecklistapi-nyeo6rl4xa-uc.a.run.app?date=${Uri.encodeComponent(controllerDate.text)}&well=${Uri.encodeComponent(controllerWell.text)}&doghouse=${Uri.encodeComponent(controllerDoghouse.text)}");
+    
+//     // http.post(url, body: {
+//     //   "date": controllerDate.text,
+//     //   "well": controllerWell.text,
+//     //   "doghouse": controllerDoghouse.text
+//     // });
+//     try {
+//       // final response = await http.post(
+//       //   url,
+//       //   body: jsonEncode({
+//       //     "date": controllerDate.text,
+//       //     "well": controllerWell.text,
+//       //     "doghouse": controllerDoghouse.text,
+//       //   }),
+//         //headers: {"Content-Type": "application/json"},
+//         final response = await http.get(url);
+
+//       if (response.statusCode == 200) {
+//         ScaffoldMessenger.of(context).showSnackBar(
+//           SnackBar(content: Text('Data added successfully')),
+//         );
+//       } else {
+//         ScaffoldMessenger.of(context).showSnackBar(
+//           SnackBar(content: Text('Failed to add data: ${response.reasonPhrase}')),
+//         );
+//       }
+//     } catch (e) {
+//       ScaffoldMessenger.of(context).showSnackBar(
+//         SnackBar(content: Text('An error occurred: $e')),
+//       );
+//     }
+   
+//   }
