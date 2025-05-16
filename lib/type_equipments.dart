@@ -1,6 +1,6 @@
 import 'package:app_quanly_bomdau/checklist_memory_surface.dart';
 import 'package:app_quanly_bomdau/checklist_plt.dart';
-import 'package:app_quanly_bomdau/checklist_surface.dart';
+import 'package:app_quanly_bomdau/checklist_surface2.dart';
 import 'package:app_quanly_bomdau/model/checklist.dart';
 import 'package:flutter/material.dart';
 
@@ -30,7 +30,7 @@ scrollDirection: Axis.vertical,
                
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => MyCheckLis()),
+                MaterialPageRoute(builder: (context) => PLT_page(idDanhMucCheckList: checklist.id.toString(), idLoaiMay: 7,tenLoaiMay: "temp",)),
               );
             
              
@@ -60,7 +60,7 @@ scrollDirection: Axis.vertical,
                
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => PLT_page(idDanhMucCheckList: checklist.id.toString())),
+                MaterialPageRoute(builder: (context) => PLT_page(idDanhMucCheckList: checklist.id.toString(), idLoaiMay: 8,tenLoaiMay: "temp",)),
               );}
           ),
           CurvedListItem(

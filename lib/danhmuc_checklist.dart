@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:app_quanly_bomdau/checklist_insert.dart';
+import 'package:app_quanly_bomdau/danhmuc_loaimay.dart';
 import 'package:app_quanly_bomdau/model/checklist.dart';
 import 'package:app_quanly_bomdau/type_equipments.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +21,8 @@ class CustomListView extends StatelessWidget {
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => TypeEquipments(checklist: checklists[index],)),
+              //MaterialPageRoute(builder: (context) => TypeEquipments(checklist: checklists[index],)),
+              MaterialPageRoute(builder: (context) => DanhMucLoaiMayScreen(checklist: checklists[index],)),
             );
           },
           child: createViewItem(checklists[index], context),
@@ -97,22 +99,9 @@ Widget createViewItem(Checklist checklist, BuildContext context) {
 }
 
 Future<List<Checklist>> fetchCheckList() async {
-  final url =  Uri.parse('http://diavatly.com/checklist/api/danhmuc_checklist_api.php');
+  //final url =  Uri.parse('http://diavatly.com/checklist/api/danhmuc_checklist_api.php');
+  final url =  Uri.parse('https://us-central1-checklist-447fd.cloudfunctions.net/fetchCheckList');
   
- ///print('Response status: ${response.statusCode}');
-  //print('Response body: ${response.body}');
-  
-  
-  
-  
-  // if (response.statusCode == 200) {
-  //   List<dynamic> data = json.decode(response.body);
-  //   return data.map((item) => Checklist.fromJson(item as Map<String, dynamic>)).toList();
-  // } else {
-  //   throw Exception('Failed to load checklist');
-  // }
-
-  //final url = Uri.parse('http://diavatly.com/checklist/api/danhmuc_may_api.php');
   try {
     final response = await http.get(url);
     if (response.statusCode == 200) {
@@ -175,6 +164,34 @@ class _DanhMuucCheckListState extends State<DanhMuucCheckList> {
                 bottom: Radius.circular(0),
               ),
               ),
+              leading:
+                PopupMenuButton<String>(
+                  // Adjust the offset to move the menu to the left
+                icon: Icon(Icons.more_vert, color: Colors.white),
+                color: Colors.white, // Set the background color to white
+                onSelected: (value) {
+                  // Handle menu item selection
+                  if (value == 'Settings') {
+                  // Navigate to settings page or perform action
+                  } else if (value == 'Logout') {
+                  // Perform logout action
+                  }
+                },
+                itemBuilder: (BuildContext context) {
+                  return [
+                  PopupMenuItem(
+                    value: 'Settings',
+                    child: Text('Kho Tổng'),
+                  ),
+                  PopupMenuItem(
+                    value: 'Logout',
+                    child: Text('Logout'),
+                  ),
+                  ];
+                },
+                ),
+              
+              
             ),
             
             body: RefreshIndicator(

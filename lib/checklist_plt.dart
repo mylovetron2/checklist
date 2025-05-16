@@ -3,19 +3,24 @@ import 'package:app_quanly_bomdau/content_widget.dart';
 import 'package:app_quanly_bomdau/model/danhmuc_may.dart';
 import 'package:app_quanly_bomdau/model/detail_checklist.dart';
 import 'package:chips_choice/chips_choice.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class PLT_page extends StatefulWidget {
-  const PLT_page({super.key, required this.idDanhMucCheckList});
+  const PLT_page({super.key, required this.idDanhMucCheckList, required this.idLoaiMay, required this.tenLoaiMay});
   //final List<DetailCheckList> detailChecklists;
   final String idDanhMucCheckList;
+  final int idLoaiMay;
+  final String tenLoaiMay;
 
   @override
   State<PLT_page> createState() => _PLT_pageState();
 }
 
 class _PLT_pageState extends State<PLT_page> {
+
+
   int tag = 3;
   
   // multiple choice value
@@ -37,7 +42,7 @@ class _PLT_pageState extends State<PLT_page> {
   void initState() {
     super.initState();
    // Fetch data from the API
-  futureDanhMucMay = getDanhMucMayApi();
+  futureDanhMucMay = getDanhMucMayApi(widget.idLoaiMay);
     futureDanhMucMay.then((danhMucMayList) {
     setState(() {
       // Convert DanhMucMay to options
@@ -82,8 +87,8 @@ class _PLT_pageState extends State<PLT_page> {
         centerTitle: true,
         backgroundColor: Colors.blue,
         elevation: 4.0,
-        title: const Text(
-          'PLT downhole tools',
+        title: Text(
+            '${widget.tenLoaiMay}',
           style: TextStyle(color: Colors.white,fontSize: 22,fontWeight: FontWeight.bold),
         ),
         leading: IconButton(
@@ -141,8 +146,10 @@ class _PLT_pageState extends State<PLT_page> {
 }
 
 
-Future<List<DanhMucMay>> getDanhMucMayApi() async {
-  final url = Uri.parse('http://diavatly.com/checklist/api/danhmuc_may_api.php');
+Future<List<DanhMucMay>> getDanhMucMayApi(int idLoaiMay) async {
+  //final url = Uri.parse('http://diavatly.com/checklist/api/danhmuc_may_api.php');
+  final url = Uri.parse('https://fetchdanhmucmay-nyeo6rl4xa-uc.a.run.app?id_loai_may=$idLoaiMay');
+ 
   try {
     final response = await http.get(url);
 
@@ -165,42 +172,44 @@ Future<List<DanhMucMay>> getDanhMucMayApi() async {
     return <DanhMucMay>[];
   }
 }
-Future<List<DanhMucMay>> getDanhMucMayApiWithParam(String param) async {
-  final url = Uri.parse('http://diavatly.com/checklist/api/danhmuc_may_api.php');
-  final headers = {'Content-Type': 'application/json'};
-  final body = jsonEncode({'param': param}); // Include the parameter in the request body
+// Future<List<DanhMucMay>> getDanhMucMayApiWithParam(String param) async {
+//   final url = Uri.parse('http://diavatly.com/checklist/api/danhmuc_may_api.php');
+//   final headers = {'Content-Type': 'application/json'};
+//   final body = jsonEncode({'param': param}); // Include the parameter in the request body
 
-  try {
-    final response = await http.post(url, headers: headers, body: body);
+//   try {
+//     final response = await http.post(url, headers: headers, body: body);
 
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+//     if (response.statusCode == 200) {
+//       final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
 
-      // Check if the response contains a "data" key
-      if (jsonResponse.containsKey('data')) {
-        final List<dynamic> data = jsonResponse['data'];
-        return data.map((item) => DanhMucMay.fromJson(item as Map<String, dynamic>)).toList();
-      } else {
-        throw Exception('Invalid API response: Missing "data" key');
-      }
-    } else {
-      throw Exception('Failed to load data from API. Status code: ${response.statusCode}');
-    }
-  } catch (e) {
-    print('Error fetching data from API with parameter: $e');
-    return <DanhMucMay>[];
-  }
-}
+//       // Check if the response contains a "data" key
+//       if (jsonResponse.containsKey('data')) {
+//         final List<dynamic> data = jsonResponse['data'];
+//         return data.map((item) => DanhMucMay.fromJson(item as Map<String, dynamic>)).toList();
+//       } else {
+//         throw Exception('Invalid API response: Missing "data" key');
+//       }
+//     } else {
+//       throw Exception('Failed to load data from API. Status code: ${response.statusCode}');
+//     }
+//   } catch (e) {
+//     print('Error fetching data from API with parameter: $e');
+//     return <DanhMucMay>[];
+//   }
+// }
 
 
 Future<List<DetailCheckList>> getDetailCheckListById(String idDanhMucChecklist) async {
   
-  final url = Uri.parse('http://diavatly.com/checklist/api/detail_checklist_api.php');
-  final headers = {'Content-Type': 'application/json'};
-  final body = jsonEncode({'action': 'SELECT_BY_ID', 'id_danhmuc_checklist': idDanhMucChecklist});
+  //final url = Uri.parse('http://diavatly.com/checklist/api/detail_checklist_api.php');
+  final url = Uri.parse('https://us-central1-checklist-447fd.cloudfunctions.net/getFetchDetailCheckListById?id_danhmuc_checklist=$idDanhMucChecklist');
+  
+  //final body = jsonEncode({'action': 'SELECT_BY_ID', 'id_danhmuc_checklist': idDanhMucChecklist});
+  //final body = jsonEncode({'id_danhmuc_checklist': idDanhMucChecklist});
 
   try {
-    final response = await http.post(url, headers: headers, body: body);
+    final response = await http.get(url);
 
     if (response.statusCode == 200) {
       //print(response.body);
@@ -224,23 +233,37 @@ Future<List<DetailCheckList>> getDetailCheckListById(String idDanhMucChecklist) 
 
 void callSelectInsertApi(String idDanhmucChecklist, List<String> tags) async {
   //print(tags);
-  final url = Uri.parse('http://diavatly.com/checklist/api/temp_api.php');
-  final headers = {'Content-Type': 'application/json'};
-  final body = jsonEncode({
-    'action': 'SELECT_INSERT', // Specify the action
-    'id_danhmuc_checklist': idDanhmucChecklist, // Replace with the actual ID you want to select and insert
-    'ids':tags, // Replace with the actual IDs you want to select and insert
-  });
+  //final url = Uri.parse('http://diavatly.com/checklist/api/temp_api.php');
+  final url = Uri.parse('https://us-central1-checklist-447fd.cloudfunctions.net/insertDetailCheckList');
+  
+  try{
+    // final response = await http.post(url, body: {
+    //   "action": "SELECT_INSERT", 
+    //   "id_danhmuc_checklist": idDanhmucChecklist, 
+    //   "ids":tags.toString(), 
+    // });
+     final body = {
+      "action": "SELECT_INSERT",
+      "id_danhmuc_checklist": idDanhmucChecklist,
+      "ids": tags.toString(), // Pass the list directly without converting to a string
+    };
 
-  try {
-    final response = await http.post(url, headers: headers, body: body);
-
+     final response = await http.post(url, body:body);
     if (response.statusCode == 200) {
-      print('SELECT_INSERT Response: ${response.body}');
+      //print(response.body);
+      final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+
+      // Check if the response contains a "data" key
+      if (jsonResponse.containsKey('data')) {
+        final List<dynamic> data = jsonResponse['data'];
+        print('Data inserted successfully: $data');
+      } else {
+        throw Exception('Invalid API response: Missing "data" key');
+      }
     } else {
-      print('Failed to call SELECT_INSERT API. Status code: ${response.statusCode}');
+      throw Exception('Failed to load data from API. Status code: ${response.statusCode}');
     }
   } catch (e) {
-    print('Error calling SELECT_INSERT API: $e');
+    print('Error fetching data from API detail_checklist_api: $e');
   }
 }
