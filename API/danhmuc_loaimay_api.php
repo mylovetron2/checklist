@@ -23,7 +23,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 switch ($method) {
     case 'GET': // Select all records
-        $sql = "SELECT id_loai_may,ten_loai FROM `checklist_loai_maygieng`s";
+        $sql = "SELECT id_loai_may,ten_loai FROM `checklist_loai_maygieng`";
         $result = $conn->query($sql);
 
         if (!$result) {

@@ -124,6 +124,37 @@ exports.fetchDanhMucMay = onRequest(async (request, response) => {
     }
 });
 
+
+exports.fetchViewOnShore = onRequest(async (request, response) => {
+    try {
+        const apiUrl = "http://diavatly.com/checklist/api/danhmuc_may_onshore_api.php";
+        const headers = {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Credentials": true,
+            "Access-Control-Allow-Methods": "GET, POST",
+            "Access-Control-Allow-Headers": "X-Requested-With"
+        };
+
+        const apiResponse = await fetch(apiUrl, { headers });
+        if (!apiResponse.ok) {
+            throw new Error(`API request failed with status ${apiResponse.status}`);
+        }
+
+        const data = await apiResponse.json();
+        response.setHeader("Content-Type", "application/json");
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        response.setHeader("Access-Control-Allow-Credentials", true);
+        response.setHeader("Access-Control-Allow-Methods", "GET, POST");
+        response.setHeader("Access-Control-Allow-Headers", "X-Requested-With");
+        response.status(200).send(data);
+    } catch (error) {
+        logger.error("Error fetching view onshore:", error);
+        response.status(500).send({ error: "Failed to fetch view onshore" });
+    }
+});
+
+
 exports.getFetchDetailCheckListById = onRequest(async (request, response) => {
     try {
         const { id_danhmuc_checklist } = request.query; // Use query parameters for GET request

@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:app_quanly_bomdau/checklist_insert.dart';
 import 'package:app_quanly_bomdau/danhmuc_loaimay.dart';
+import 'package:app_quanly_bomdau/khotong_screen.dart';
 import 'package:app_quanly_bomdau/model/checklist.dart';
-import 'package:app_quanly_bomdau/type_equipments.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -124,6 +124,8 @@ Future<List<Checklist>> fetchCheckList() async {
   }
 }
 
+
+
 class DanhMuucCheckList extends StatefulWidget {
   const DanhMuucCheckList({super.key});
 
@@ -173,6 +175,10 @@ class _DanhMuucCheckListState extends State<DanhMuucCheckList> {
                   // Handle menu item selection
                   if (value == 'Settings') {
                   // Navigate to settings page or perform action
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => KhoTong()),
+                  );
                   } else if (value == 'Logout') {
                   // Perform logout action
                   }
@@ -224,3 +230,4 @@ class _DanhMuucCheckListState extends State<DanhMuucCheckList> {
     );
   }
 }
+

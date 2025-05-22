@@ -1,12 +1,6 @@
 //import 'package:app_quanly_bomdau/checklist.dart';
 //import 'package:app_quanly_bomdau/checklist2.dart';
-import 'package:app_quanly_bomdau/checklist_plt.dart';
-import 'package:app_quanly_bomdau/checklist_surface.dart';
 import 'package:app_quanly_bomdau/danhmuc_checklist.dart';
-import 'package:app_quanly_bomdau/danhmuc_loaimay.dart';
-import 'package:app_quanly_bomdau/model/checklist.dart';
-import 'package:app_quanly_bomdau/model/danhmuc_loai_may.dart';
-import 'package:app_quanly_bomdau/type_equipments.dart';
 import 'package:flutter/material.dart';
 
 
@@ -34,7 +28,6 @@ class MyApp extends StatelessWidget {
       // 
       //home: DanhMucLoaiMayScreen(checklistId: Checklist(id: 8, name: 'Sample Checklist')), // Replace with your actual Checklist object
     home: DanhMuucCheckList(),
-
-    //home: PLT_page(idDanhMucCheckList: '8',), // Replace with your actual idDanhMucCheckList
+    //home: KhoTong(), // Replace with your actual idDanhMucCheckList
     );}}
    

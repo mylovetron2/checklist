@@ -3,7 +3,6 @@ import 'package:app_quanly_bomdau/content_widget.dart';
 import 'package:app_quanly_bomdau/model/danhmuc_may.dart';
 import 'package:app_quanly_bomdau/model/detail_checklist.dart';
 import 'package:chips_choice/chips_choice.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -88,7 +87,7 @@ class _PLT_pageState extends State<PLT_page> {
         backgroundColor: Colors.blue,
         elevation: 4.0,
         title: Text(
-            '${widget.tenLoaiMay}',
+            widget.tenLoaiMay,
           style: TextStyle(color: Colors.white,fontSize: 22,fontWeight: FontWeight.bold),
         ),
         leading: IconButton(
@@ -266,4 +265,10 @@ void callSelectInsertApi(String idDanhmucChecklist, List<String> tags) async {
   } catch (e) {
     print('Error fetching data from API detail_checklist_api: $e');
   }
+}
+
+String optionsToText(Map<String, List<String>> options) {
+  return options.entries
+      .map((entry) => '${entry.key}: ${entry.value.join(", ")}')
+      .join('\n');
 }

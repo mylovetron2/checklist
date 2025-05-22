@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'package:app_quanly_bomdau/checklist_plt.dart';
+import 'package:app_quanly_bomdau/model/detail_checklist.dart';
+import 'package:app_quanly_bomdau/pdf_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:app_quanly_bomdau/model/danhmuc_loai_may.dart';
@@ -30,7 +32,7 @@ Future<List<DanhMucLoaiMay>> fetchDanhMucLoaiMay() async {
 
 class DanhMucLoaiMayScreen extends StatefulWidget {
   final Checklist checklist;
-
+  
   const DanhMucLoaiMayScreen({super.key, required this.checklist});
 
   @override
@@ -39,11 +41,38 @@ class DanhMucLoaiMayScreen extends StatefulWidget {
 
 class _DanhMucLoaiMayScreenState extends State<DanhMucLoaiMayScreen> {
   late Future<List<DanhMucLoaiMay>> _futureDanhMucLoaiMay;
+  late Future<List<DetailCheckList>> _futureDetailCheckList;
 
+  String text='';
   @override
   void initState() {
     super.initState();
     _futureDanhMucLoaiMay = fetchDanhMucLoaiMay();
+    _futureDetailCheckList = getDetailCheckListById(widget.checklist.id.toString());
+    
+    _futureDetailCheckList.then((onValue) {
+      List<String> lstTemp = [];
+      Map<String, List<String>> lstData={};
+      if (onValue.isNotEmpty) {
+        lstData = {};
+      for (var danhMucMay in onValue) {
+        if (!lstData.containsKey(danhMucMay.tenLoaiMay)) {
+          lstData[danhMucMay.tenLoaiMay] = []; // Create a new list for the key if it doesn't exist
+        }
+        lstData[danhMucMay.tenLoaiMay]!.add(danhMucMay.tenMay+danhMucMay.serialNumber); // Add the serial number to the list
+      }
+        print('DEBUG lstData: $lstData'); // Debug print statement
+        setState(() {
+          //text = detailCheckListToText(onValue);
+          
+          final merged = mergeLst(lstData.entries.toList());
+           text = customLstDataToText(merged);
+           //text = lstDataToText(lstData);
+
+        });
+      }
+    });
+    //text=detailCheckListToText(_futureDetailCheckList as List<DetailCheckList>);
   }
 
   @override
@@ -111,49 +140,172 @@ class _DanhMucLoaiMayScreenState extends State<DanhMucLoaiMayScreen> {
       },
     );
   }
+
+  AppBar customAppBar(BuildContext context, String id, String date, String well, String doghouse) {
+  return AppBar(
+      centerTitle: true,
+      title: Text('Checklist', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
+      backgroundColor: Colors.blue,
+      leading: IconButton(
+       onPressed: () {
+        Navigator.pop(context);
+       },
+       icon: Icon(Icons.arrow_back, color: Colors.white),
+      ),
+      actions: [
+       PopupMenuButton<String>(
+        icon: Icon(Icons.more_vert, color: Colors.white),
+        onSelected: (value) {
+          // Handle menu actions here
+          if (value == 'refresh') {
+           // Example: refresh the page
+           Navigator.pop(context);
+           Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => DanhMucLoaiMayScreen(
+               checklist: Checklist(
+                id: id,
+                date: date,
+                well: well,
+                doghouse: doghouse,
+               ),
+              ),
+            ),
+           );
+          }
+          // Add more actions if needed
+          if (value == 'print') {
+           // Example: navigate to print screen
+           Navigator.push(
+            context,
+            MaterialPageRoute(
+             builder: (context) => PdfPreviewPage(text),
+            ),
+           );
+          }
+        },
+        itemBuilder: (BuildContext context) => [
+          PopupMenuItem(
+           value: 'print',
+           child: Text('Print'),
+          ),
+          PopupMenuItem(
+           value: 'refresh',
+           child: Text('Refresh'),
+          ),
+          // Add more menu items here if needed
+          
+        ],
+       ),
+      ],
+      bottom: PreferredSize(
+       preferredSize: Size.fromHeight(30),
+       child: Container(
+        margin: EdgeInsets.all(10),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+           SizedBox(height: 5),
+           Align(
+            alignment: Alignment.center,
+            child: Text(
+              '${DateTime.parse(date).day}/${DateTime.parse(date).month}/${DateTime.parse(date).year}',
+              style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+            ),
+           ),
+           Text(
+            '-$well',
+            style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+           ),
+           // Text(
+           //   '-$doghouse',
+           //   style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+           // ),
+          ],
+        ),
+       ),
+      ),
+    );
+ }
+
 }
 
 
-AppBar customAppBar(BuildContext context, String id, String date, String well, String doghouse) {
-   return AppBar(
-        centerTitle: true,
-        title: Text('Checklist', style: TextStyle(color: Colors.white,fontSize: 22,fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.blue,
-        leading: IconButton(
-          onPressed: () {Navigator.pop(context);},
-          icon: Icon(Icons.arrow_back, color: Colors.white),
-        ),
-       
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(30),
-            child: Container(
-               margin: EdgeInsets.all(10),
-           
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-              SizedBox(height: 5),
-              Align(
-                alignment: Alignment.center,
-                child: Text(
-                '${DateTime.parse(date).day}/${DateTime.parse(date).month}/${DateTime.parse(date).year}',
-                style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
-                ),
-              ),
-              Text(
-                '-$well',
-                style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
-              ),
-              // Text(
-              //   '-$doghouse',
-              //   style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
-              // ),
-              ],
-            ),
-            ),
-            ),
-          
-       
-      );
- }
 
+Future<List<DetailCheckList>> getDetailCheckListById(String idDanhMucChecklist) async {
+  
+  //final url = Uri.parse('http://diavatly.com/checklist/api/detail_checklist_api.php');
+  final url = Uri.parse('https://us-central1-checklist-447fd.cloudfunctions.net/getFetchDetailCheckListById?id_danhmuc_checklist=$idDanhMucChecklist');
+  
+  //final body = jsonEncode({'action': 'SELECT_BY_ID', 'id_danhmuc_checklist': idDanhMucChecklist});
+  //final body = jsonEncode({'id_danhmuc_checklist': idDanhMucChecklist});
+
+  try {
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      //print(response.body);
+      final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+
+      // Check if the response contains a "data" key
+      if (jsonResponse.containsKey('data')) {
+        final List<dynamic> data = jsonResponse['data'];
+        return data.map((item) => DetailCheckList.fromJson(item as Map<String, dynamic>)).toList();
+      } else {
+        throw Exception('Invalid API response: Missing "data" key');
+      }
+    } else {
+      throw Exception('Failed to load data from API. Status code: ${response.statusCode}');
+    }
+  } catch (e) {
+    print('Error fetching data from API detail_checklist_api: $e');
+    return <DetailCheckList>[];
+  }
+}
+
+String optionsToText(Map<String, List<String>> options) {
+  return options.entries
+      .map((entry) => '${entry.key}: ${entry.value.join(", ")}')
+      .join('\n');
+}
+
+String detailCheckListToText(List<DetailCheckList> details) {
+  return details
+      .map((item) => '${item.tenMay}: ${item.serialNumber}') // Adjust fields as needed
+      .join('\n');
+}
+
+String lstDataToText(Map<String, List<String>> lstData) {
+  return lstData.entries
+      .map((entry) => '${entry.key}: ${entry.value.join(", ")}')
+      .join('\n');
+}
+
+// String customLstDataToText(Map<String, List<String>> lstData) {
+//   return lstData.entries.map((entry) {
+//     return '${entry.key}\n${entry.value.join(" ")}';
+//   }).join('\n');
+// }
+
+String customLstDataToText(Map<String, List<String>> lstData, {int itemsPerLine = 2}) {
+  return lstData.entries.map((entry) {
+    final values = entry.value;
+    final buffer = StringBuffer('${entry.key}\n\n');
+    for (int i = 0; i < values.length; i += itemsPerLine) {
+      buffer.writeln(
+        values.skip(i).take(itemsPerLine).join('\t\t\t\t')
+      );
+    }
+    return buffer.toString().trimRight();
+  }).join('\n\n\n');
+}
+
+Map<String, List<String>> mergeLst(List<MapEntry<String, List<String>>> lst) {
+  final Map<String, List<String>> merged = {};
+  for (var entry in lst) {
+    merged.putIfAbsent(entry.key, () => []);
+    merged[entry.key]!.addAll(entry.value);
+  }
+  return merged;
+}
