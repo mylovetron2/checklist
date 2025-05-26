@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:app_quanly_bomdau/checklist_plt.dart';
 import 'package:app_quanly_bomdau/model/detail_checklist.dart';
+import 'package:app_quanly_bomdau/pdf_detail_checklist_screen.dart';
 import 'package:app_quanly_bomdau/pdf_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -42,7 +43,7 @@ class DanhMucLoaiMayScreen extends StatefulWidget {
 class _DanhMucLoaiMayScreenState extends State<DanhMucLoaiMayScreen> {
   late Future<List<DanhMucLoaiMay>> _futureDanhMucLoaiMay;
   late Future<List<DetailCheckList>> _futureDetailCheckList;
-
+  Map<String, List<String>> lstData={};
   String text='';
   @override
   void initState() {
@@ -52,7 +53,7 @@ class _DanhMucLoaiMayScreenState extends State<DanhMucLoaiMayScreen> {
     
     _futureDetailCheckList.then((onValue) {
       List<String> lstTemp = [];
-      Map<String, List<String>> lstData={};
+      
       if (onValue.isNotEmpty) {
         lstData = {};
       for (var danhMucMay in onValue) {
@@ -180,7 +181,7 @@ class _DanhMucLoaiMayScreenState extends State<DanhMucLoaiMayScreen> {
            Navigator.push(
             context,
             MaterialPageRoute(
-             builder: (context) => PdfPreviewPage(text),
+             builder: (context) => PdfDetailChecklistPage(lstData, well, doghouse, DateTime.parse(date)),
             ),
            );
           }

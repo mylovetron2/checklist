@@ -98,10 +98,37 @@ class _PLT_pageState extends State<PLT_page> {
         ),
         actions: [
           IconButton(
-            onPressed: () {
+            onPressed: () async {
               callSelectInsertApi(widget.idDanhMucCheckList, tags);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                content: Row(
+                  children: [
+                  Icon(Icons.check_circle, color: Colors.green, size: 28),
+                  SizedBox(width: 12),
+                  Text(
+                    'Lưu thành công!',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Colors.green,
+                    ),
+                    //style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                  ],
+                ),
+                backgroundColor: Colors.white,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(color: Colors.green, width: 2),
+                ),
+                duration: Duration(seconds: 2),
+                )
+              
+              );
             },
-            icon: Icon(Icons.cloud_sync, color: Colors.white, size: 40.0),
+            icon: Icon(Icons.save, color: Colors.white, size: 30.0),
           ),
         ],
       ),
@@ -171,33 +198,6 @@ Future<List<DanhMucMay>> getDanhMucMayApi(int idLoaiMay) async {
     return <DanhMucMay>[];
   }
 }
-// Future<List<DanhMucMay>> getDanhMucMayApiWithParam(String param) async {
-//   final url = Uri.parse('http://diavatly.com/checklist/api/danhmuc_may_api.php');
-//   final headers = {'Content-Type': 'application/json'};
-//   final body = jsonEncode({'param': param}); // Include the parameter in the request body
-
-//   try {
-//     final response = await http.post(url, headers: headers, body: body);
-
-//     if (response.statusCode == 200) {
-//       final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
-
-//       // Check if the response contains a "data" key
-//       if (jsonResponse.containsKey('data')) {
-//         final List<dynamic> data = jsonResponse['data'];
-//         return data.map((item) => DanhMucMay.fromJson(item as Map<String, dynamic>)).toList();
-//       } else {
-//         throw Exception('Invalid API response: Missing "data" key');
-//       }
-//     } else {
-//       throw Exception('Failed to load data from API. Status code: ${response.statusCode}');
-//     }
-//   } catch (e) {
-//     print('Error fetching data from API with parameter: $e');
-//     return <DanhMucMay>[];
-//   }
-// }
-
 
 Future<List<DetailCheckList>> getDetailCheckListById(String idDanhMucChecklist) async {
   
