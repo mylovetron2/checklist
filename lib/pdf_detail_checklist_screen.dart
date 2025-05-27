@@ -9,7 +9,15 @@ class PdfDetailChecklistPage extends StatelessWidget {
   final String well;
   final String doghouse;
   final DateTime date;
-  const PdfDetailChecklistPage(this.lstData, this.well, this.doghouse, this.date, {super.key});
+  final String title;
+  const PdfDetailChecklistPage(
+    this.lstData,
+    this.well,
+    this.doghouse,
+    this.date,
+    this.title, // add title parameter
+    {super.key}
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +58,7 @@ class PdfDetailChecklistPage extends StatelessWidget {
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
                     pw.Text(
-                      "CHECKLIST",
+                        title,
                       style: pw.TextStyle(
                         font: font,
                         fontSize: 28,

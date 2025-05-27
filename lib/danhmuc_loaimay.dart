@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:app_quanly_bomdau/checklist_plt.dart';
 import 'package:app_quanly_bomdau/model/detail_checklist.dart';
 import 'package:app_quanly_bomdau/pdf_detail_checklist_screen.dart';
-import 'package:app_quanly_bomdau/pdf_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:app_quanly_bomdau/model/danhmuc_loai_may.dart';
@@ -181,7 +180,7 @@ class _DanhMucLoaiMayScreenState extends State<DanhMucLoaiMayScreen> {
            Navigator.push(
             context,
             MaterialPageRoute(
-             builder: (context) => PdfDetailChecklistPage(lstData, well, doghouse, DateTime.parse(date)),
+             builder: (context) => PdfDetailChecklistPage(lstData, well, doghouse, DateTime.parse(date),"CHECKLIST"),
             ),
            );
           }

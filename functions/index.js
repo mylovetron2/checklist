@@ -228,8 +228,7 @@ exports.insertCheckListApi = onRequest(async (request, response) => {
 });
 
 exports.insertCheckListPostApi = onRequest(async (request, response) => {
-    try {
-        
+    try {   
       
         //const postData={well:"test",doghouse:"test",date:"2023-10-10"};
         const postData = request.body; // Use the request body directly
@@ -251,7 +250,8 @@ exports.insertCheckListPostApi = onRequest(async (request, response) => {
         response.setHeader("Access-Control-Allow-Credentials", true);
         response.setHeader("Access-Control-Allow-Methods", "GET, POST");
         response.setHeader("Access-Control-Allow-Headers", "X-Requested-With");
-        response.status(200).send(JSON.stringify({date,well,doghouse}));
+        //response.status(200).send(JSON.stringify({date,well,doghouse}));
+        response.status(200).send(data);
     } catch (error) {
         logger.error("Error inserting checklist:", error);
         response.status(500).send({ error: "Failed to insert checklist" });
@@ -298,6 +298,41 @@ exports.insertDetailCheckList = onRequest(async (request, response) => {
     }
 });
 
+exports.deleteChecklist = onRequest(async (request, response) => {
+    try {
+        // if (request.method !== 'POST') {
+        //     response.status(405).send({ error: "Method not allowed" });
+        //     return;
+        // }
+        const { checklist_id } = request.body;
+        // if (!checklist_id) {
+        //     response.status(400).send({ error: "Missing required parameter: checklist_id" });
+        //     return;
+        // }
+
+        const apiUrl = `http://diavatly.com/checklist/api/checklist_delete.php`;
+        const apiResponse = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ checklist_id })
+        });
+
+        if (!apiResponse.ok) {
+            throw new Error(`API request failed with status ${apiResponse.status}`);
+        }
+
+        const data = await apiResponse.json();
+        response.setHeader("Content-Type", "application/json");
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        response.setHeader("Access-Control-Allow-Credentials", true);
+        response.setHeader("Access-Control-Allow-Methods", "GET, POST");
+        response.setHeader("Access-Control-Allow-Headers", "Content-Type, X-Requested-With, Accept, Origin");
+        response.status(200).send(data);
+    } catch (error) {
+        logger.error("Error deleting checklist:", error);
+        response.status(500).send({ error: "Failed to delete checklist" });
+    }
+});
 
 
 
