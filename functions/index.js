@@ -10,15 +10,6 @@
 const {onRequest} = require("firebase-functions/v2/https");
 const {onDocumentWritten} = require("firebase-functions/v2/firestore");
 const logger = require("firebase-functions/logger");
-//const fetch = require("node-fetch");
-
-// Create and deploy your first functions
-// https://firebase.google.com/docs/functions/get-started
-
-// exports.helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
 
 exports.fetchCheckList = onRequest(async (request, response) => {
 
@@ -269,7 +260,6 @@ exports.testPost = onRequest(async (request, response) => {
     }
 });
 
-
 exports.insertDetailCheckList = onRequest(async (request, response) => {
     try {
         const postData = request.body; // Use the request body directly
@@ -333,9 +323,6 @@ exports.deleteChecklist = onRequest(async (request, response) => {
         response.status(500).send({ error: "Failed to delete checklist" });
     }
 });
-
-
-
 
 
 // exports.insertCheckListApi = onRequest(async (request, response) => {

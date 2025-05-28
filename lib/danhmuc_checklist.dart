@@ -244,11 +244,10 @@ class _DanhMuucCheckListState extends State<DanhMuucCheckList> {
       }
         print('DEBUG lstData: $lstData'); // Debug print statement
         setState(() {
-          //text = detailCheckListToText(onValue);
-          
-          final merged = mergeLst(lstData.entries.toList());
-           text = customLstDataToText(merged);
-           //text = lstDataToText(lstData);
+                 
+          //final merged = mergeLst(lstData.entries.toList());
+           //text = customLstDataToText(merged);
+          text = customLstDataToText(lstData);
 
         });
       }

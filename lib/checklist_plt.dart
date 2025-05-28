@@ -27,33 +27,23 @@ class _PLT_pageState extends State<PLT_page> {
 
   late Future<List<DetailCheckList>> futureTags;
   late Future<List<DanhMucMay>> futureDanhMucMay;
-  // Map<String, List<String>> options = {'MPL 022': ['021293', '021219','011098'],
-  //                                      'MPL 030': ['10024935'],
-  //                                      'MPL 024':['020220','031353','Hunting SPS','LEE-509019'],
-  //                                      'XTU 004':['218421','215996','217200','217201','AJG00068'],
-  //                                      'QPC 004':['10427','021000','22801','212158','22550','212268','031355','021016','021017','Print 920',],
-
-  //                                     };
-
   Map<String, List<String>> options={};
 
   @override
   void initState() {
     super.initState();
    // Fetch data from the API
-  futureDanhMucMay = getDanhMucMayApi(widget.idLoaiMay);
+    futureDanhMucMay = getDanhMucMayApi(widget.idLoaiMay);
     futureDanhMucMay.then((danhMucMayList) {
     setState(() {
       // Convert DanhMucMay to options
       options = {};
       for (var danhMucMay in danhMucMayList) {
-        if (!options.containsKey(danhMucMay.tenMay  )) {
+        if (!options.containsKey(danhMucMay.tenMay)) {
           options[danhMucMay.tenMay] = []; // Create a new list for the key if it doesn't exist
         }
         options[danhMucMay.tenMay]!.add(danhMucMay.serialNumber); // Add the serial number to the list
       }
-
-      //print('Converted options: $options'); // Debugging output
     });
   }).catchError((error) {
     print('Error converting futureDanhMucMay to options: $error');
@@ -73,9 +63,7 @@ class _PLT_pageState extends State<PLT_page> {
     });
   }).catchError((error) {
     print('Error converting futureTags to tags: $error');
-  });
-
-    
+  });    
   }
 
   @override
@@ -99,7 +87,16 @@ class _PLT_pageState extends State<PLT_page> {
         actions: [
           IconButton(
             onPressed: () async {
-              callSelectInsertApi(widget.idDanhMucCheckList, tags);
+                showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) => const Center(
+                  child: CircularProgressIndicator(),
+                ),
+                );
+                await callSelectInsertApi(widget.idDanhMucCheckList, tags);
+                Navigator.of(context).pop(); // Close the dialog
+              
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                 content: Row(
@@ -171,7 +168,6 @@ class _PLT_pageState extends State<PLT_page> {
   }
 }
 
-
 Future<List<DanhMucMay>> getDanhMucMayApi(int idLoaiMay) async {
   //final url = Uri.parse('http://diavatly.com/checklist/api/danhmuc_may_api.php');
   final url = Uri.parse('https://fetchdanhmucmay-nyeo6rl4xa-uc.a.run.app?id_loai_may=$idLoaiMay');
@@ -230,24 +226,16 @@ Future<List<DetailCheckList>> getDetailCheckListById(String idDanhMucChecklist) 
   }
 }
 
-void callSelectInsertApi(String idDanhmucChecklist, List<String> tags) async {
-  //print(tags);
-  //final url = Uri.parse('http://diavatly.com/checklist/api/temp_api.php');
+Future<bool> callSelectInsertApi(String idDanhmucChecklist, List<String> tags) async {
   final url = Uri.parse('https://us-central1-checklist-447fd.cloudfunctions.net/insertDetailCheckList');
-  
   try{
-    // final response = await http.post(url, body: {
-    //   "action": "SELECT_INSERT", 
-    //   "id_danhmuc_checklist": idDanhmucChecklist, 
-    //   "ids":tags.toString(), 
-    // });
-     final body = {
+    final body = {
       "action": "SELECT_INSERT",
       "id_danhmuc_checklist": idDanhmucChecklist,
       "ids": tags.toString(), // Pass the list directly without converting to a string
     };
 
-     final response = await http.post(url, body:body);
+    final response = await http.post(url, body:body);
     if (response.statusCode == 200) {
       //print(response.body);
       final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
@@ -256,6 +244,7 @@ void callSelectInsertApi(String idDanhmucChecklist, List<String> tags) async {
       if (jsonResponse.containsKey('data')) {
         final List<dynamic> data = jsonResponse['data'];
         print('Data inserted successfully: $data');
+        return true;
       } else {
         throw Exception('Invalid API response: Missing "data" key');
       }
@@ -264,6 +253,7 @@ void callSelectInsertApi(String idDanhmucChecklist, List<String> tags) async {
     }
   } catch (e) {
     print('Error fetching data from API detail_checklist_api: $e');
+    return false;
   }
 }
 
