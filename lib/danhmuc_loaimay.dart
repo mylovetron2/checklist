@@ -1,28 +1,31 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:app_quanly_bomdau/checklist_plt.dart';
 import 'package:app_quanly_bomdau/model/detail_checklist.dart';
 import 'package:app_quanly_bomdau/pdf_detail_checklist_screen.dart';
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:app_quanly_bomdau/model/danhmuc_loai_may.dart';
 import 'package:app_quanly_bomdau/model/checklist.dart';
 
 Future<List<DanhMucLoaiMay>> fetchDanhMucLoaiMay() async {
-  final url = Uri.parse('https://us-central1-checklist-447fd.cloudfunctions.net/fetchLoaiMay');
-
+  final url = Uri.parse(
+      'https://us-central1-checklist-447fd.cloudfunctions.net/fetchLoaiMay');
   try {
     final response = await http.get(url);
     if (response.statusCode == 200) {
-      final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
-
+      final jsonResponse = jsonDecode(response.body);
       if (jsonResponse.containsKey('data')) {
         final List<dynamic> data = jsonResponse['data'];
-        return data.map((item) => DanhMucLoaiMay.fromJson(item as Map<String, dynamic>)).toList();
+        return data
+            .map(
+                (item) => DanhMucLoaiMay.fromJson(item as Map<String, dynamic>))
+            .toList();
       } else {
         throw Exception('Invalid API response: Missing "data" key');
       }
     } else {
-      throw Exception('Failed to load data from API. Status code: ${response.statusCode}');
+      throw Exception(
+          'Failed to load data from API. Status code: ${response.statusCode}');
     }
   } catch (e) {
     print('Error fetching data from API: $e');
@@ -32,7 +35,6 @@ Future<List<DanhMucLoaiMay>> fetchDanhMucLoaiMay() async {
 
 class DanhMucLoaiMayScreen extends StatefulWidget {
   final Checklist checklist;
-  
   const DanhMucLoaiMayScreen({super.key, required this.checklist});
 
   @override
@@ -42,37 +44,30 @@ class DanhMucLoaiMayScreen extends StatefulWidget {
 class _DanhMucLoaiMayScreenState extends State<DanhMucLoaiMayScreen> {
   late Future<List<DanhMucLoaiMay>> _futureDanhMucLoaiMay;
   late Future<List<DetailCheckList>> _futureDetailCheckList;
-  Map<String, List<String>> lstData={};
-  String text='';
+  Map<String, List<String>> lstData = {};
+  String text = '';
+
   @override
   void initState() {
     super.initState();
     _futureDanhMucLoaiMay = fetchDanhMucLoaiMay();
-    _futureDetailCheckList = getDetailCheckListById(widget.checklist.id.toString());
-    
-    _futureDetailCheckList.then((onValue) {
-      List<String> lstTemp = [];
-      
-      if (onValue.isNotEmpty) {
-        lstData = {};
-      for (var danhMucMay in onValue) {
-        if (!lstData.containsKey(danhMucMay.tenLoaiMay)) {
-          lstData[danhMucMay.tenLoaiMay] = []; // Create a new list for the key if it doesn't exist
-        }
-        lstData[danhMucMay.tenLoaiMay]!.add(danhMucMay.tenMay+danhMucMay.serialNumber); // Add the serial number to the list
-      }
-        print('DEBUG lstData: $lstData'); // Debug print statement
-        setState(() {
-          //text = detailCheckListToText(onValue);
-          
-          final merged = mergeLst(lstData.entries.toList());
-           text = customLstDataToText(merged);
-           //text = lstDataToText(lstData);
+    _futureDetailCheckList =
+        getDetailCheckListById(widget.checklist.id.toString());
 
+    _futureDetailCheckList.then((onValue) {
+      if (onValue.isNotEmpty) {
+        final Map<String, List<String>> tempMap = {};
+        for (var danhMucMay in onValue) {
+          tempMap.putIfAbsent(danhMucMay.tenLoaiMay, () => []);
+          tempMap[danhMucMay.tenLoaiMay]!
+              .add('${danhMucMay.tenMay} (${danhMucMay.serialNumber})');
+        }
+        setState(() {
+          lstData = tempMap;
+          text = customLstDataToText(lstData);
         });
       }
     });
-    //text=detailCheckListToText(_futureDetailCheckList as List<DetailCheckList>);
   }
 
   @override
@@ -80,183 +75,187 @@ class _DanhMucLoaiMayScreenState extends State<DanhMucLoaiMayScreen> {
     return FutureBuilder<List<DanhMucLoaiMay>>(
       future: _futureDanhMucLoaiMay,
       builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          List<DanhMucLoaiMay> danhMucLoaiMays = snapshot.data!;
-          return Scaffold(
-            appBar: customAppBar(context, widget.checklist.id, widget.checklist.date, widget.checklist.well, widget.checklist.doghouse),
-            body: ListView.builder(
-              itemCount: danhMucLoaiMays.length,
-              itemBuilder: (context, index) {
-                final loaiMay = danhMucLoaiMays[index];
-                return InkWell(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => PLT_page(
-                          idDanhMucCheckList: widget.checklist.id.toString(),
-                          idLoaiMay: int.parse(loaiMay.idLoaiMay),
-                          tenLoaiMay: loaiMay.tenLoai,
-                         
-                          
-                        ),
-                      ),
-                    );
-                  },
-                  child: Card(
-                    elevation: 8,
-                    margin: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: ListTile(
-                      contentPadding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-                      title: Text(
-                        loaiMay.tenLoai,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      subtitle: Text(
-                        loaiMay.ghiChu,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.black54,
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
           );
         } else if (snapshot.hasError) {
-          return Text('${snapshot.error}');
-        } else {
-          return Center(child: CircularProgressIndicator());
+          return Scaffold(
+            appBar: customAppBar(context, widget.checklist),
+            body: Center(child: Text('${snapshot.error}')),
+          );
+        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return Scaffold(
+            appBar: customAppBar(context, widget.checklist),
+            body: const Center(child: Text('Không có dữ liệu')),
+          );
         }
+        final danhMucLoaiMays = snapshot.data!;
+        return Scaffold(
+          appBar: customAppBar(context, widget.checklist),
+          body: ListView.separated(
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+            itemCount: danhMucLoaiMays.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 12),
+            itemBuilder: (context, index) {
+              final loaiMay = danhMucLoaiMays[index];
+              return ChecklistCard(
+                loaiMay: loaiMay,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => PLT_page(
+                        idDanhMucCheckList: widget.checklist.id.toString(),
+                        idLoaiMay: int.parse(loaiMay.idLoaiMay),
+                        tenLoaiMay: loaiMay.tenLoai,
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        );
       },
     );
   }
 
-  AppBar customAppBar(BuildContext context, String id, String date, String well, String doghouse) {
-  return AppBar(
+  AppBar customAppBar(BuildContext context, Checklist checklist) {
+    return AppBar(
       centerTitle: true,
-      title: Text('Checklist', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
-      backgroundColor: Colors.blue,
+      backgroundColor: Colors.blueAccent,
+      elevation: 4,
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const Text(
+            'Checklist',
+            style: TextStyle(
+                color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            '${_formatDate(checklist.date)} - ${checklist.well}',
+            style: const TextStyle(
+                color: Colors.white70,
+                fontSize: 15,
+                fontWeight: FontWeight.w400),
+          ),
+        ],
+      ),
       leading: IconButton(
-       onPressed: () {
-        Navigator.pop(context);
-       },
-       icon: Icon(Icons.arrow_back, color: Colors.white),
+        onPressed: () => Navigator.pop(context),
+        icon: const Icon(Icons.arrow_back, color: Colors.white),
       ),
       actions: [
-       PopupMenuButton<String>(
-        icon: Icon(Icons.more_vert, color: Colors.white),
-        onSelected: (value) {
-          // Handle menu actions here
-          if (value == 'refresh') {
-           // Example: refresh the page
-           Navigator.pop(context);
-           Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => DanhMucLoaiMayScreen(
-               checklist: Checklist(
-                id: id,
-                date: date,
-                well: well,
-                doghouse: doghouse,
-               ),
-              ),
-            ),
-           );
-          }
-          // Add more actions if needed
-          if (value == 'print') {
-           // Example: navigate to print screen
-           Navigator.push(
-            context,
-            MaterialPageRoute(
-             builder: (context) => PdfDetailChecklistPage(lstData, well, doghouse, DateTime.parse(date),"CHECKLIST"),
-            ),
-           );
-          }
-        },
-        itemBuilder: (BuildContext context) => [
-          PopupMenuItem(
-           value: 'print',
-           child: Text('Print'),
-          ),
-          PopupMenuItem(
-           value: 'refresh',
-           child: Text('Refresh'),
-          ),
-          // Add more menu items here if needed
-          
-        ],
-       ),
-      ],
-      bottom: PreferredSize(
-       preferredSize: Size.fromHeight(30),
-       child: Container(
-        margin: EdgeInsets.all(10),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-           SizedBox(height: 5),
-           Align(
-            alignment: Alignment.center,
-            child: Text(
-              '${DateTime.parse(date).day}/${DateTime.parse(date).month}/${DateTime.parse(date).year}',
-              style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-           ),
-           Text(
-            '-$well',
-            style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
-           ),
-           // Text(
-           //   '-$doghouse',
-           //   style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
-           // ),
+        PopupMenuButton<String>(
+          icon: const Icon(Icons.more_vert, color: Colors.white),
+          onSelected: (value) {
+            if (value == 'refresh') {
+              Navigator.pop(context);
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => DanhMucLoaiMayScreen(
+                    checklist: checklist,
+                  ),
+                ),
+              );
+            }
+            if (value == 'print') {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => PdfDetailChecklistPage(
+                    lstData,
+                    checklist.well,
+                    checklist.doghouse,
+                    DateTime.parse(checklist.date),
+                    "CHECKLIST",
+                  ),
+                ),
+              );
+            }
+          },
+          itemBuilder: (context) => [
+            const PopupMenuItem(value: 'print', child: Text('In Checklist')),
+            const PopupMenuItem(value: 'refresh', child: Text('Làm mới')),
           ],
         ),
-       ),
-      ),
+      ],
     );
- }
+  }
 
+  String _formatDate(String date) {
+    final d = DateTime.parse(date);
+    return '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
+  }
 }
 
+class ChecklistCard extends StatelessWidget {
+  final DanhMucLoaiMay loaiMay;
+  final VoidCallback onTap;
+  const ChecklistCard({super.key, required this.loaiMay, required this.onTap});
 
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 6,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+      color: Colors.white,
+      child: ListTile(
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        leading: CircleAvatar(
+          backgroundColor: Colors.blueAccent,
+          child: Icon(Icons.checklist, color: Colors.white),
+        ),
+        title: Text(
+          loaiMay.tenLoai,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+            color: Colors.black87,
+            letterSpacing: 0.5,
+          ),
+        ),
+        subtitle: loaiMay.ghiChu.isNotEmpty
+            ? Padding(
+                padding: const EdgeInsets.only(top: 4.0),
+                child: Text(
+                  loaiMay.ghiChu,
+                  style: const TextStyle(fontSize: 15, color: Colors.black54),
+                ),
+              )
+            : null,
+        trailing: const Icon(Icons.arrow_forward_ios, color: Colors.blueAccent),
+        onTap: onTap,
+      ),
+    );
+  }
+}
 
-Future<List<DetailCheckList>> getDetailCheckListById(String idDanhMucChecklist) async {
-  
-  //final url = Uri.parse('http://diavatly.com/checklist/api/detail_checklist_api.php');
-  final url = Uri.parse('https://us-central1-checklist-447fd.cloudfunctions.net/getFetchDetailCheckListById?id_danhmuc_checklist=$idDanhMucChecklist');
-  
-  //final body = jsonEncode({'action': 'SELECT_BY_ID', 'id_danhmuc_checklist': idDanhMucChecklist});
-  //final body = jsonEncode({'id_danhmuc_checklist': idDanhMucChecklist});
-
+Future<List<DetailCheckList>> getDetailCheckListById(
+    String idDanhMucChecklist) async {
+  final url = Uri.parse(
+      'https://us-central1-checklist-447fd.cloudfunctions.net/getFetchDetailCheckListById?id_danhmuc_checklist=$idDanhMucChecklist');
   try {
     final response = await http.get(url);
-
     if (response.statusCode == 200) {
-      //print(response.body);
-      final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
-
-      // Check if the response contains a "data" key
+      final jsonResponse = jsonDecode(response.body);
       if (jsonResponse.containsKey('data')) {
         final List<dynamic> data = jsonResponse['data'];
-        return data.map((item) => DetailCheckList.fromJson(item as Map<String, dynamic>)).toList();
+        return data
+            .map((item) =>
+                DetailCheckList.fromJson(item as Map<String, dynamic>))
+            .toList();
       } else {
         throw Exception('Invalid API response: Missing "data" key');
       }
     } else {
-      throw Exception('Failed to load data from API. Status code: ${response.statusCode}');
+      throw Exception(
+          'Failed to load data from API. Status code: ${response.statusCode}');
     }
   } catch (e) {
     print('Error fetching data from API detail_checklist_api: $e');
@@ -264,48 +263,14 @@ Future<List<DetailCheckList>> getDetailCheckListById(String idDanhMucChecklist) 
   }
 }
 
-String optionsToText(Map<String, List<String>> options) {
-  return options.entries
-      .map((entry) => '${entry.key}: ${entry.value.join(", ")}')
-      .join('\n');
-}
-
-String detailCheckListToText(List<DetailCheckList> details) {
-  return details
-      .map((item) => '${item.tenMay}: ${item.serialNumber}') // Adjust fields as needed
-      .join('\n');
-}
-
-String lstDataToText(Map<String, List<String>> lstData) {
-  return lstData.entries
-      .map((entry) => '${entry.key}: ${entry.value.join(", ")}')
-      .join('\n');
-}
-
-// String customLstDataToText(Map<String, List<String>> lstData) {
-//   return lstData.entries.map((entry) {
-//     return '${entry.key}\n${entry.value.join(" ")}';
-//   }).join('\n');
-// }
-
-String customLstDataToText(Map<String, List<String>> lstData, {int itemsPerLine = 2}) {
+String customLstDataToText(Map<String, List<String>> lstData,
+    {int itemsPerLine = 2}) {
   return lstData.entries.map((entry) {
     final values = entry.value;
-    final buffer = StringBuffer('${entry.key}\n\n');
+    final buffer = StringBuffer('${entry.key}\n');
     for (int i = 0; i < values.length; i += itemsPerLine) {
-      buffer.writeln(
-        values.skip(i).take(itemsPerLine).join('\t\t\t\t')
-      );
+      buffer.writeln(values.skip(i).take(itemsPerLine).join('\t'));
     }
     return buffer.toString().trimRight();
-  }).join('\n\n\n');
-}
-
-Map<String, List<String>> mergeLst(List<MapEntry<String, List<String>>> lst) {
-  final Map<String, List<String>> merged = {};
-  for (var entry in lst) {
-    merged.putIfAbsent(entry.key, () => []);
-    merged[entry.key]!.addAll(entry.value);
-  }
-  return merged;
+  }).join('\n');
 }

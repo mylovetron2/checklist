@@ -7,7 +7,11 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class PLT_page extends StatefulWidget {
-  const PLT_page({super.key, required this.idDanhMucCheckList, required this.idLoaiMay, required this.tenLoaiMay});
+  const PLT_page(
+      {super.key,
+      required this.idDanhMucCheckList,
+      required this.idLoaiMay,
+      required this.tenLoaiMay});
   //final List<DetailCheckList> detailChecklists;
   final String idDanhMucCheckList;
   final int idLoaiMay;
@@ -18,65 +22,65 @@ class PLT_page extends StatefulWidget {
 }
 
 class _PLT_pageState extends State<PLT_page> {
-
-
   int tag = 3;
-  
+
   // multiple choice value
   List<String> tags = [];
 
   late Future<List<DetailCheckList>> futureTags;
   late Future<List<DanhMucMay>> futureDanhMucMay;
-  Map<String, List<String>> options={};
+  Map<String, List<String>> options = {};
 
   @override
   void initState() {
     super.initState();
-   // Fetch data from the API
+    // Fetch data from the API
     futureDanhMucMay = getDanhMucMayApi(widget.idLoaiMay);
     futureDanhMucMay.then((danhMucMayList) {
-    setState(() {
-      // Convert DanhMucMay to options
-      options = {};
-      for (var danhMucMay in danhMucMayList) {
-        if (!options.containsKey(danhMucMay.tenMay)) {
-          options[danhMucMay.tenMay] = []; // Create a new list for the key if it doesn't exist
+      setState(() {
+        // Convert DanhMucMay to options
+        options = {};
+        for (var danhMucMay in danhMucMayList) {
+          if (!options.containsKey(danhMucMay.tenMay)) {
+            options[danhMucMay.tenMay] =
+                []; // Create a new list for the key if it doesn't exist
+          }
+          options[danhMucMay.tenMay]!.add(
+              danhMucMay.serialNumber); // Add the serial number to the list
         }
-        options[danhMucMay.tenMay]!.add(danhMucMay.serialNumber); // Add the serial number to the list
-      }
-    });
-  }).catchError((error) {
-    print('Error converting futureDanhMucMay to options: $error');
-  });
- 
-  futureTags = getDetailCheckListById(widget.idDanhMucCheckList)
-    ..then((detailCheckList) {
-      print('Fetched futureTags: $detailCheckList'); // Debugging output
+      });
     }).catchError((error) {
-      print('Error fetching futureTags: $error'); // Debugging output
+      print('Error converting futureDanhMucMay to options: $error');
     });
-  
-  futureTags.then((detailCheckList) {
-    setState(() {
-      tags = detailCheckList.map((item) => item.serialNumber).toList();
-      print('Converted futureTags to tags: $tags'); // Debugging output
+
+    futureTags = getDetailCheckListById(widget.idDanhMucCheckList)
+      ..then((detailCheckList) {
+        print('Fetched futureTags: $detailCheckList'); // Debugging output
+      }).catchError((error) {
+        print('Error fetching futureTags: $error'); // Debugging output
+      });
+
+    futureTags.then((detailCheckList) {
+      setState(() {
+        tags = detailCheckList.map((item) => item.serialNumber).toList();
+        print('Converted futureTags to tags: $tags'); // Debugging output
+      });
+    }).catchError((error) {
+      print('Error converting futureTags to tags: $error');
     });
-  }).catchError((error) {
-    print('Error converting futureTags to tags: $error');
-  });    
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      
       appBar: AppBar(
         centerTitle: true,
         backgroundColor: Colors.blue,
         elevation: 4.0,
         title: Text(
-            widget.tenLoaiMay,
-          style: TextStyle(color: Colors.white,fontSize: 22,fontWeight: FontWeight.bold),
+          widget.tenLoaiMay,
+          style: TextStyle(
+              color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -87,31 +91,30 @@ class _PLT_pageState extends State<PLT_page> {
         actions: [
           IconButton(
             onPressed: () async {
-                showDialog(
+              showDialog(
                 context: context,
                 barrierDismissible: false,
                 builder: (context) => const Center(
                   child: CircularProgressIndicator(),
                 ),
-                );
-                await callSelectInsertApi(widget.idDanhMucCheckList, tags);
-                Navigator.of(context).pop(); // Close the dialog
-              
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
+              );
+              await callSelectInsertApi(widget.idDanhMucCheckList, tags);
+              Navigator.of(context).pop();
+
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                 content: Row(
                   children: [
-                  Icon(Icons.check_circle, color: Colors.green, size: 28),
-                  SizedBox(width: 12),
-                  Text(
-                    'Lưu thành công!',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: Colors.green,
+                    Icon(Icons.check_circle, color: Colors.green, size: 28),
+                    SizedBox(width: 12),
+                    Text(
+                      'Lưu thành công!',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: Colors.green,
+                      ),
+                      //style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                     ),
-                    //style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
                   ],
                 ),
                 backgroundColor: Colors.white,
@@ -121,9 +124,7 @@ class _PLT_pageState extends State<PLT_page> {
                   side: BorderSide(color: Colors.green, width: 2),
                 ),
                 duration: Duration(seconds: 2),
-                )
-              
-              );
+              ));
             },
             icon: Icon(Icons.save, color: Colors.white, size: 30.0),
           ),
@@ -136,28 +137,27 @@ class _PLT_pageState extends State<PLT_page> {
             Expanded(
               child: ListView(
                 children: [
-                 
-                            ...options.entries.map((entry) => Content(
-                              title: entry.key,
-                              child: ChipsChoice<String>.multiple(
-                                value: tags,
-                                onChanged: (val) => setState(() => tags = val),
-                                choiceItems: C2Choice.listFrom<String, String>(
-                                  source: entry.value,
-                                  value: (i, v) => v,
-                                  label: (i, v) => v,
-                                ),
-                                choiceCheckmark: true,
-                                textDirection: TextDirection.ltr,
-                                wrapped: true,
-                                choiceStyle: C2ChipStyle.filled(
-                                  foregroundStyle: const TextStyle(fontSize: 20),
-                                  borderRadius: const BorderRadius.all(Radius.circular(5)),
-                                  selectedStyle: C2ChipStyle.filled(),
-                                ),
-                              ),
-                            ))
-                           
+                  ...options.entries.map((entry) => Content(
+                        title: entry.key,
+                        child: ChipsChoice<String>.multiple(
+                          value: tags,
+                          onChanged: (val) => setState(() => tags = val),
+                          choiceItems: C2Choice.listFrom<String, String>(
+                            source: entry.value,
+                            value: (i, v) => v,
+                            label: (i, v) => v,
+                          ),
+                          choiceCheckmark: true,
+                          textDirection: TextDirection.ltr,
+                          wrapped: true,
+                          choiceStyle: C2ChipStyle.filled(
+                            foregroundStyle: const TextStyle(fontSize: 20),
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(5)),
+                            selectedStyle: C2ChipStyle.filled(),
+                          ),
+                        ),
+                      ))
                 ],
               ),
             ),
@@ -170,8 +170,9 @@ class _PLT_pageState extends State<PLT_page> {
 
 Future<List<DanhMucMay>> getDanhMucMayApi(int idLoaiMay) async {
   //final url = Uri.parse('http://diavatly.com/checklist/api/danhmuc_may_api.php');
-  final url = Uri.parse('https://fetchdanhmucmay-nyeo6rl4xa-uc.a.run.app?id_loai_may=$idLoaiMay');
- 
+  final url = Uri.parse(
+      'https://fetchdanhmucmay-nyeo6rl4xa-uc.a.run.app?id_loai_may=$idLoaiMay');
+
   try {
     final response = await http.get(url);
 
@@ -182,12 +183,15 @@ Future<List<DanhMucMay>> getDanhMucMayApi(int idLoaiMay) async {
       // Check if the response contains a "data" key
       if (jsonResponse.containsKey('data')) {
         final List<dynamic> data = jsonResponse['data'];
-        return data.map((item) => DanhMucMay.fromJson(item as Map<String, dynamic>)).toList();
+        return data
+            .map((item) => DanhMucMay.fromJson(item as Map<String, dynamic>))
+            .toList();
       } else {
         throw Exception('Invalid API response: Missing "data" key');
       }
     } else {
-      throw Exception('Failed to load data from API. Status code: ${response.statusCode}');
+      throw Exception(
+          'Failed to load data from API. Status code: ${response.statusCode}');
     }
   } catch (e) {
     print('Error fetching data from API: $e');
@@ -195,11 +199,12 @@ Future<List<DanhMucMay>> getDanhMucMayApi(int idLoaiMay) async {
   }
 }
 
-Future<List<DetailCheckList>> getDetailCheckListById(String idDanhMucChecklist) async {
-  
+Future<List<DetailCheckList>> getDetailCheckListById(
+    String idDanhMucChecklist) async {
   //final url = Uri.parse('http://diavatly.com/checklist/api/detail_checklist_api.php');
-  final url = Uri.parse('https://us-central1-checklist-447fd.cloudfunctions.net/getFetchDetailCheckListById?id_danhmuc_checklist=$idDanhMucChecklist');
-  
+  final url = Uri.parse(
+      'https://us-central1-checklist-447fd.cloudfunctions.net/getFetchDetailCheckListById?id_danhmuc_checklist=$idDanhMucChecklist');
+
   //final body = jsonEncode({'action': 'SELECT_BY_ID', 'id_danhmuc_checklist': idDanhMucChecklist});
   //final body = jsonEncode({'id_danhmuc_checklist': idDanhMucChecklist});
 
@@ -213,12 +218,16 @@ Future<List<DetailCheckList>> getDetailCheckListById(String idDanhMucChecklist) 
       // Check if the response contains a "data" key
       if (jsonResponse.containsKey('data')) {
         final List<dynamic> data = jsonResponse['data'];
-        return data.map((item) => DetailCheckList.fromJson(item as Map<String, dynamic>)).toList();
+        return data
+            .map((item) =>
+                DetailCheckList.fromJson(item as Map<String, dynamic>))
+            .toList();
       } else {
         throw Exception('Invalid API response: Missing "data" key');
       }
     } else {
-      throw Exception('Failed to load data from API. Status code: ${response.statusCode}');
+      throw Exception(
+          'Failed to load data from API. Status code: ${response.statusCode}');
     }
   } catch (e) {
     print('Error fetching data from API detail_checklist_api: $e');
@@ -226,16 +235,19 @@ Future<List<DetailCheckList>> getDetailCheckListById(String idDanhMucChecklist) 
   }
 }
 
-Future<bool> callSelectInsertApi(String idDanhmucChecklist, List<String> tags) async {
-  final url = Uri.parse('https://us-central1-checklist-447fd.cloudfunctions.net/insertDetailCheckList');
-  try{
+Future<bool> callSelectInsertApi(
+    String idDanhmucChecklist, List<String> tags) async {
+  final url = Uri.parse(
+      'https://us-central1-checklist-447fd.cloudfunctions.net/insertDetailCheckList');
+  try {
     final body = {
       "action": "SELECT_INSERT",
       "id_danhmuc_checklist": idDanhmucChecklist,
-      "ids": tags.toString(), // Pass the list directly without converting to a string
+      "ids": tags
+          .toString(), // Pass the list directly without converting to a string
     };
 
-    final response = await http.post(url, body:body);
+    final response = await http.post(url, body: body);
     if (response.statusCode == 200) {
       //print(response.body);
       final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
@@ -249,7 +261,8 @@ Future<bool> callSelectInsertApi(String idDanhmucChecklist, List<String> tags) a
         throw Exception('Invalid API response: Missing "data" key');
       }
     } else {
-      throw Exception('Failed to load data from API. Status code: ${response.statusCode}');
+      throw Exception(
+          'Failed to load data from API. Status code: ${response.statusCode}');
     }
   } catch (e) {
     print('Error fetching data from API detail_checklist_api: $e');

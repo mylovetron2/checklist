@@ -10,14 +10,9 @@ class PdfDetailChecklistPage extends StatelessWidget {
   final String doghouse;
   final DateTime date;
   final String title;
-  const PdfDetailChecklistPage(
-    this.lstData,
-    this.well,
-    this.doghouse,
-    this.date,
-    this.title, // add title parameter
-    {super.key}
-  );
+  const PdfDetailChecklistPage(this.lstData, this.well, this.doghouse,
+      this.date, this.title, // add title parameter
+      {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -33,8 +28,9 @@ class PdfDetailChecklistPage extends StatelessWidget {
 
   Future<Uint8List> makePdf() async {
     final pdf = pw.Document();
-    final font = pw.Font.ttf(await rootBundle.load('fonts/NotoSans-Regular.ttf'));
-    final logo  = await rootBundle.load('images/logoDVL.png');
+    final font =
+        pw.Font.ttf(await rootBundle.load('fonts/NotoSans-Regular.ttf'));
+    final logo = await rootBundle.load('images/logoDVL.png');
     //final ByteData bytes = await rootBundle.load('assets/phone.png');
     final Uint8List byteList = logo.buffer.asUint8List();
     pdf.addPage(
@@ -58,7 +54,7 @@ class PdfDetailChecklistPage extends StatelessWidget {
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
                     pw.Text(
-                        title,
+                      title,
                       style: pw.TextStyle(
                         font: font,
                         fontSize: 28,
@@ -70,15 +66,18 @@ class PdfDetailChecklistPage extends StatelessWidget {
                     pw.SizedBox(height: 4),
                     pw.Text(
                       "Well: $well",
-                      style: pw.TextStyle(font: font, fontSize: 14, color: PdfColors.grey800),
+                      style: pw.TextStyle(
+                          font: font, fontSize: 14, color: PdfColors.grey800),
                     ),
                     pw.Text(
                       "Doghouse: $doghouse",
-                      style: pw.TextStyle(font: font, fontSize: 14, color: PdfColors.grey800),
+                      style: pw.TextStyle(
+                          font: font, fontSize: 14, color: PdfColors.grey800),
                     ),
                     pw.Text(
                       "Date: ${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}",
-                      style: pw.TextStyle(font: font, fontSize: 14, color: PdfColors.grey800),
+                      style: pw.TextStyle(
+                          font: font, fontSize: 14, color: PdfColors.grey800),
                     ),
                   ],
                 ),
@@ -91,7 +90,8 @@ class PdfDetailChecklistPage extends StatelessWidget {
                   // ),
                   alignment: pw.Alignment.center,
                   child: pw.Image(
-                    pw.MemoryImage(byteList), width: 65,
+                    pw.MemoryImage(byteList),
+                    width: 65,
                     height: 65,
                   ),
                 ),
@@ -102,14 +102,15 @@ class PdfDetailChecklistPage extends StatelessWidget {
           // Checklist sections
           ...lstData.entries.expand((entry) {
             final items = entry.value;
-            final itemsPerCol = (items.length / 3).ceil();
-            final columns = List.generate(3, (col) {
+            final colCount = items.length < 3 ? items.length : 3;
+            final itemsPerCol =
+                (items.length / (colCount == 0 ? 1 : colCount)).ceil();
+            final columns = List.generate(colCount, (col) {
               final start = col * itemsPerCol;
-              final end = (col + 1) * itemsPerCol;
-              final colItems = items.sublist(
-                start,
-                end > items.length ? items.length : end,
-              );
+              if (start >= items.length)
+                return pw.Expanded(child: pw.Container());
+              final end = ((col + 1) * itemsPerCol).clamp(0, items.length);
+              final colItems = items.sublist(start, end);
               return pw.Expanded(
                 child: pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -130,7 +131,10 @@ class PdfDetailChecklistPage extends StatelessWidget {
                           pw.Expanded(
                             child: pw.Text(
                               item,
-                              style: pw.TextStyle(font: font, fontSize: 13, color: PdfColors.grey900),
+                              style: pw.TextStyle(
+                                  font: font,
+                                  fontSize: 13,
+                                  color: PdfColors.grey900),
                             ),
                           ),
                         ],
@@ -139,11 +143,11 @@ class PdfDetailChecklistPage extends StatelessWidget {
                 ),
               );
             });
-
             return [
               pw.Container(
                 margin: const pw.EdgeInsets.only(top: 16, bottom: 8),
-                padding: const pw.EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                padding:
+                    const pw.EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                 decoration: pw.BoxDecoration(
                   color: PdfColors.blue50,
                   borderRadius: pw.BorderRadius.circular(8),
@@ -173,7 +177,8 @@ class PdfDetailChecklistPage extends StatelessWidget {
             alignment: pw.Alignment.centerRight,
             child: pw.Text(
               "Generated by Checklist App",
-              style: pw.TextStyle(font: font, fontSize: 10, color: PdfColors.grey600),
+              style: pw.TextStyle(
+                  font: font, fontSize: 10, color: PdfColors.grey600),
             ),
           ),
         ],
