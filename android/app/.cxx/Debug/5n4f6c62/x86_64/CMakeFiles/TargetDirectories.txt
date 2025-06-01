@@ -1,0 +1,2 @@
+D:/flutter/app_quanly_bomdau/app_quanly_bomdau/android/app/.cxx/Debug/5n4f6c62/x86_64/CMakeFiles/edit_cache.dir
+D:/flutter/app_quanly_bomdau/app_quanly_bomdau/android/app/.cxx/Debug/5n4f6c62/x86_64/CMakeFiles/rebuild_cache.dir
