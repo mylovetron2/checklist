@@ -1,8 +1,10 @@
+import 'package:app_quanly_bomdau/model/tags_model.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:provider/provider.dart';
 
 class QRCodeScreen extends StatefulWidget {
-  const QRCodeScreen({Key? key}) : super(key: key);
+  const QRCodeScreen({super.key});
 
   @override
   State<QRCodeScreen> createState() => _QRCodeScreenState();
@@ -82,6 +84,14 @@ class _QRCodeScreenState extends State<QRCodeScreen> {
                 setState(() {
                   _dialogShown = false;
                 });
+
+                /// Update TagsModel or perform any logic needed before returning the result.
+                /// For example, you might call a provider or setState here.
+                /// Example (pseudo-code):
+                // Replace the following line with your actual state management logic.
+                // For example, if using Provider:
+                Provider.of<TagsModel>(context, listen: false).addTag(qrCode!);
+                //print('Tag added: $qrCode');
                 Navigator.of(context).pop(qrCode);
               },
             ),

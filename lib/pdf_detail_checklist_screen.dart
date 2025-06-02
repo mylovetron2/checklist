@@ -107,8 +107,9 @@ class PdfDetailChecklistPage extends StatelessWidget {
                 (items.length / (colCount == 0 ? 1 : colCount)).ceil();
             final columns = List.generate(colCount, (col) {
               final start = col * itemsPerCol;
-              if (start >= items.length)
+              if (start >= items.length) {
                 return pw.Expanded(child: pw.Container());
+              }
               final end = ((col + 1) * itemsPerCol).clamp(0, items.length);
               final colItems = items.sublist(start, end);
               return pw.Expanded(

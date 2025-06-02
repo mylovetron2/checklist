@@ -12,6 +12,13 @@ class TagsModel extends ChangeNotifier {
     }
   }
 
+  void setTags(List<String> tags) {
+    _tags
+      ..clear()
+      ..addAll(tags.toSet());
+    notifyListeners();
+  }
+
   void removeTag(String tag) {
     if (_tags.remove(tag)) {
       notifyListeners();
@@ -21,5 +28,11 @@ class TagsModel extends ChangeNotifier {
   void clearTags() {
     _tags.clear();
     notifyListeners();
+  }
+
+  void printTags() {
+    for (var tag in _tags) {
+      debugPrint(tag);
+    }
   }
 }

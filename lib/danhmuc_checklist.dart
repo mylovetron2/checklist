@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:app_quanly_bomdau/model/tags_model.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -8,6 +9,7 @@ import 'package:app_quanly_bomdau/khotong_screen.dart';
 import 'package:app_quanly_bomdau/model/checklist.dart';
 import 'package:app_quanly_bomdau/model/danhmuc_may.dart';
 import 'package:app_quanly_bomdau/pdf_detail_checklist_screen.dart';
+import 'package:provider/provider.dart';
 
 class DanhMuucCheckList extends StatefulWidget {
   const DanhMuucCheckList({super.key});
@@ -169,6 +171,8 @@ Widget createViewItem(Checklist checklist, BuildContext context) {
       onTap: isInactive
           ? null
           : () {
+              //TagsModel().clearTags();
+              Provider.of<TagsModel>(context, listen: false).clearTags();
               Navigator.push(
                 context,
                 MaterialPageRoute(

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:app_quanly_bomdau/model/tags_model.dart';
 import 'package:app_quanly_bomdau/qr_code_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -7,6 +8,7 @@ import 'package:app_quanly_bomdau/model/detail_checklist.dart';
 import 'package:app_quanly_bomdau/pdf_detail_checklist_screen.dart';
 import 'package:app_quanly_bomdau/model/danhmuc_loai_may.dart';
 import 'package:app_quanly_bomdau/model/checklist.dart';
+import 'package:provider/provider.dart';
 
 Future<List<DanhMucLoaiMay>> fetchDanhMucLoaiMay() async {
   final url = Uri.parse(
@@ -54,7 +56,13 @@ class _DanhMucLoaiMayScreenState extends State<DanhMucLoaiMayScreen> {
     _futureDanhMucLoaiMay = fetchDanhMucLoaiMay();
     _futureDetailCheckList =
         getDetailCheckListById(widget.checklist.id.toString());
-
+    _futureDetailCheckList.then((onValue) {
+      final tagsModel = Provider.of<TagsModel>(context, listen: false);
+      for (var detail in onValue) {
+        tagsModel.addTag(
+            detail.serialNumber); // or another string property as needed
+      }
+    });
     _futureDetailCheckList.then((onValue) {
       if (onValue.isNotEmpty) {
         final Map<String, List<String>> tempMap = {};
@@ -150,6 +158,46 @@ class _DanhMucLoaiMayScreenState extends State<DanhMucLoaiMayScreen> {
         icon: const Icon(Icons.arrow_back, color: Colors.white),
       ),
       actions: [
+        IconButton(
+          onPressed: () async {
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (context) => const Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
+            final tagsModel = Provider.of<TagsModel>(context, listen: false);
+            await callSelectInsertApi(widget.checklist.id, tagsModel.tags);
+            Navigator.of(context).pop();
+
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Row(
+                children: [
+                  Icon(Icons.check_circle, color: Colors.green, size: 28),
+                  SizedBox(width: 12),
+                  Text(
+                    'Lưu thành công!',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Colors.green,
+                    ),
+                    //style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                ],
+              ),
+              backgroundColor: Colors.white,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(color: Colors.green, width: 2),
+              ),
+              duration: Duration(seconds: 2),
+            ));
+          },
+          icon: Icon(Icons.save, color: Colors.white, size: 30.0),
+        ),
         PopupMenuButton<String>(
           icon: const Icon(Icons.more_vert, color: Colors.white),
           onSelected: (value) {
@@ -172,6 +220,7 @@ class _DanhMucLoaiMayScreenState extends State<DanhMucLoaiMayScreen> {
                 ),
               );
             }
+
             if (value == 'print') {
               Navigator.push(
                 context,
@@ -185,6 +234,10 @@ class _DanhMucLoaiMayScreenState extends State<DanhMucLoaiMayScreen> {
                   ),
                 ),
               );
+            }
+            if (value == 'test') {
+              final tagsModel = Provider.of<TagsModel>(context, listen: false);
+              tagsModel.printTags();
             }
           },
           itemBuilder: (context) => [
@@ -207,6 +260,13 @@ class _DanhMucLoaiMayScreenState extends State<DanhMucLoaiMayScreen> {
               child: ListTile(
                 leading: Icon(Icons.refresh, color: Colors.orange),
                 title: Text('Làm mới'),
+              ),
+            ),
+            PopupMenuItem(
+              value: 'test',
+              child: ListTile(
+                leading: Icon(Icons.refresh, color: Colors.orange),
+                title: Text('test'),
               ),
             ),
           ],
@@ -264,14 +324,35 @@ class ChecklistCard extends StatelessWidget {
   }
 }
 
+String customLstDataToText(Map<String, List<String>> lstData,
+    {int itemsPerLine = 2}) {
+  return lstData.entries.map((entry) {
+    final values = entry.value;
+    final buffer = StringBuffer('${entry.key}\n');
+    for (int i = 0; i < values.length; i += itemsPerLine) {
+      buffer.writeln(values.skip(i).take(itemsPerLine).join('\t'));
+    }
+    return buffer.toString().trimRight();
+  }).join('\n');
+}
+
 Future<List<DetailCheckList>> getDetailCheckListById(
     String idDanhMucChecklist) async {
+  //final url = Uri.parse('http://diavatly.com/checklist/api/detail_checklist_api.php');
   final url = Uri.parse(
       'https://us-central1-checklist-447fd.cloudfunctions.net/getFetchDetailCheckListById?id_danhmuc_checklist=$idDanhMucChecklist');
+
+  //final body = jsonEncode({'action': 'SELECT_BY_ID', 'id_danhmuc_checklist': idDanhMucChecklist});
+  //final body = jsonEncode({'id_danhmuc_checklist': idDanhMucChecklist});
+
   try {
     final response = await http.get(url);
+
     if (response.statusCode == 200) {
-      final jsonResponse = jsonDecode(response.body);
+      //print(response.body);
+      final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+
+      // Check if the response contains a "data" key
       if (jsonResponse.containsKey('data')) {
         final List<dynamic> data = jsonResponse['data'];
         return data
@@ -291,14 +372,37 @@ Future<List<DetailCheckList>> getDetailCheckListById(
   }
 }
 
-String customLstDataToText(Map<String, List<String>> lstData,
-    {int itemsPerLine = 2}) {
-  return lstData.entries.map((entry) {
-    final values = entry.value;
-    final buffer = StringBuffer('${entry.key}\n');
-    for (int i = 0; i < values.length; i += itemsPerLine) {
-      buffer.writeln(values.skip(i).take(itemsPerLine).join('\t'));
+Future<bool> callSelectInsertApi(
+    String idDanhmucChecklist, List<String> tags) async {
+  final url = Uri.parse(
+      'https://us-central1-checklist-447fd.cloudfunctions.net/insertDetailCheckList');
+  try {
+    final body = {
+      "action": "SELECT_INSERT",
+      "id_danhmuc_checklist": idDanhmucChecklist,
+      "ids": tags
+          .toString(), // Pass the list directly without converting to a string
+    };
+
+    final response = await http.post(url, body: body);
+    if (response.statusCode == 200) {
+      //print(response.body);
+      final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+
+      // Check if the response contains a "data" key
+      if (jsonResponse.containsKey('data')) {
+        final List<dynamic> data = jsonResponse['data'];
+        print('Data inserted successfully: $data');
+        return true;
+      } else {
+        throw Exception('Invalid API response: Missing "data" key');
+      }
+    } else {
+      throw Exception(
+          'Failed to load data from API. Status code: ${response.statusCode}');
     }
-    return buffer.toString().trimRight();
-  }).join('\n');
+  } catch (e) {
+    print('Error fetching data from API detail_checklist_api: $e');
+    return false;
+  }
 }

@@ -2,9 +2,11 @@ import 'dart:convert';
 import 'package:app_quanly_bomdau/content_widget.dart';
 import 'package:app_quanly_bomdau/model/danhmuc_may.dart';
 import 'package:app_quanly_bomdau/model/detail_checklist.dart';
+import 'package:app_quanly_bomdau/model/tags_model.dart';
 import 'package:chips_choice/chips_choice.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 
 class PLT_page extends StatefulWidget {
   const PLT_page(
@@ -22,7 +24,7 @@ class PLT_page extends StatefulWidget {
 }
 
 class _PLT_pageState extends State<PLT_page> {
-  int tag = 3;
+  //int tag = 3;
 
   // multiple choice value
   List<String> tags = [];
@@ -53,21 +55,25 @@ class _PLT_pageState extends State<PLT_page> {
       print('Error converting futureDanhMucMay to options: $error');
     });
 
-    futureTags = getDetailCheckListById(widget.idDanhMucCheckList)
-      ..then((detailCheckList) {
-        print('Fetched futureTags: $detailCheckList'); // Debugging output
-      }).catchError((error) {
-        print('Error fetching futureTags: $error'); // Debugging output
-      });
+    // futureTags = getDetailCheckListById(widget.idDanhMucCheckList)
+    //   ..then((detailCheckList) {
+    //     print('Fetched futureTags: $detailCheckList'); // Debugging output
+    //   }).catchError((error) {
+    //     print('Error fetching futureTags: $error'); // Debugging output
+    //   });
 
-    futureTags.then((detailCheckList) {
-      setState(() {
-        tags = detailCheckList.map((item) => item.serialNumber).toList();
-        print('Converted futureTags to tags: $tags'); // Debugging output
-      });
-    }).catchError((error) {
-      print('Error converting futureTags to tags: $error');
-    });
+    // futureTags.then((detailCheckList) {
+    //   setState(() {
+    //     tags = detailCheckList.map((item) => item.serialNumber).toList();
+    //     print('Converted futureTags to tags: $tags'); // Debugging output
+    //   });
+    // }).catchError((error) {
+    //   print('Error converting futureTags to tags: $error');
+    // });
+    //final tagsModel = Provider.of<TagsModel>(context, listen: false);
+    // if (tagsModel.tags.isNotEmpty) {
+    //   tags = List<String>.from(tagsModel.tags);
+    // }
   }
 
   @override
@@ -89,45 +95,53 @@ class _PLT_pageState extends State<PLT_page> {
           },
         ),
         actions: [
-          IconButton(
-            onPressed: () async {
-              showDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (context) => const Center(
-                  child: CircularProgressIndicator(),
-                ),
-              );
-              await callSelectInsertApi(widget.idDanhMucCheckList, tags);
-              Navigator.of(context).pop();
+          // IconButton(onPressed: onPressed, icon: icon), // Removed undefined IconButton
+          // IconButton(
+          //   onPressed: () {
+          //     // Add your desired action here
+          //     Provider.of<TagsModel>(context, listen: false).printTags();
+          //   },
+          //   icon: Icon(Icons.text_decrease, color: Colors.white, size: 30.0),
+          // ),
+          // IconButton(
+          //   onPressed: () async {
+          //     showDialog(
+          //       context: context,
+          //       barrierDismissible: false,
+          //       builder: (context) => const Center(
+          //         child: CircularProgressIndicator(),
+          //       ),
+          //     );
+          //     await callSelectInsertApi(widget.idDanhMucCheckList, tags);
+          //     Navigator.of(context).pop();
 
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Row(
-                  children: [
-                    Icon(Icons.check_circle, color: Colors.green, size: 28),
-                    SizedBox(width: 12),
-                    Text(
-                      'Lưu thành công!',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        color: Colors.green,
-                      ),
-                      //style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
-                  ],
-                ),
-                backgroundColor: Colors.white,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  side: BorderSide(color: Colors.green, width: 2),
-                ),
-                duration: Duration(seconds: 2),
-              ));
-            },
-            icon: Icon(Icons.save, color: Colors.white, size: 30.0),
-          ),
+          //     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          //       content: Row(
+          //         children: [
+          //           Icon(Icons.check_circle, color: Colors.green, size: 28),
+          //           SizedBox(width: 12),
+          //           Text(
+          //             'Lưu thành công!',
+          //             style: TextStyle(
+          //               fontWeight: FontWeight.bold,
+          //               fontSize: 16,
+          //               color: Colors.green,
+          //             ),
+          //             //style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          //           ),
+          //         ],
+          //       ),
+          //       backgroundColor: Colors.white,
+          //       behavior: SnackBarBehavior.floating,
+          //       shape: RoundedRectangleBorder(
+          //         borderRadius: BorderRadius.circular(12),
+          //         side: BorderSide(color: Colors.green, width: 2),
+          //       ),
+          //       duration: Duration(seconds: 2),
+          //     ));
+          //   },
+          //   icon: Icon(Icons.save, color: Colors.white, size: 30.0),
+          // ),
         ],
       ),
       body: Padding(
@@ -140,8 +154,16 @@ class _PLT_pageState extends State<PLT_page> {
                   ...options.entries.map((entry) => Content(
                         title: entry.key,
                         child: ChipsChoice<String>.multiple(
-                          value: tags,
-                          onChanged: (val) => setState(() => tags = val),
+                          // value: tags,
+                          // onChanged: (val) => setState(() => tags = val),
+                          value: Provider.of<TagsModel>(context, listen: false)
+                              .tags,
+                          onChanged: (val) {
+                            setState(() {
+                              Provider.of<TagsModel>(context, listen: false)
+                                  .setTags(val);
+                            });
+                          },
                           choiceItems: C2Choice.listFrom<String, String>(
                             source: entry.value,
                             value: (i, v) => v,
@@ -199,41 +221,41 @@ Future<List<DanhMucMay>> getDanhMucMayApi(int idLoaiMay) async {
   }
 }
 
-Future<List<DetailCheckList>> getDetailCheckListById(
-    String idDanhMucChecklist) async {
-  //final url = Uri.parse('http://diavatly.com/checklist/api/detail_checklist_api.php');
-  final url = Uri.parse(
-      'https://us-central1-checklist-447fd.cloudfunctions.net/getFetchDetailCheckListById?id_danhmuc_checklist=$idDanhMucChecklist');
+// Future<List<DetailCheckList>> getDetailCheckListById(
+//     String idDanhMucChecklist) async {
+//   //final url = Uri.parse('http://diavatly.com/checklist/api/detail_checklist_api.php');
+//   final url = Uri.parse(
+//       'https://us-central1-checklist-447fd.cloudfunctions.net/getFetchDetailCheckListById?id_danhmuc_checklist=$idDanhMucChecklist');
 
-  //final body = jsonEncode({'action': 'SELECT_BY_ID', 'id_danhmuc_checklist': idDanhMucChecklist});
-  //final body = jsonEncode({'id_danhmuc_checklist': idDanhMucChecklist});
+//   //final body = jsonEncode({'action': 'SELECT_BY_ID', 'id_danhmuc_checklist': idDanhMucChecklist});
+//   //final body = jsonEncode({'id_danhmuc_checklist': idDanhMucChecklist});
 
-  try {
-    final response = await http.get(url);
+//   try {
+//     final response = await http.get(url);
 
-    if (response.statusCode == 200) {
-      //print(response.body);
-      final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+//     if (response.statusCode == 200) {
+//       //print(response.body);
+//       final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
 
-      // Check if the response contains a "data" key
-      if (jsonResponse.containsKey('data')) {
-        final List<dynamic> data = jsonResponse['data'];
-        return data
-            .map((item) =>
-                DetailCheckList.fromJson(item as Map<String, dynamic>))
-            .toList();
-      } else {
-        throw Exception('Invalid API response: Missing "data" key');
-      }
-    } else {
-      throw Exception(
-          'Failed to load data from API. Status code: ${response.statusCode}');
-    }
-  } catch (e) {
-    print('Error fetching data from API detail_checklist_api: $e');
-    return <DetailCheckList>[];
-  }
-}
+//       // Check if the response contains a "data" key
+//       if (jsonResponse.containsKey('data')) {
+//         final List<dynamic> data = jsonResponse['data'];
+//         return data
+//             .map((item) =>
+//                 DetailCheckList.fromJson(item as Map<String, dynamic>))
+//             .toList();
+//       } else {
+//         throw Exception('Invalid API response: Missing "data" key');
+//       }
+//     } else {
+//       throw Exception(
+//           'Failed to load data from API. Status code: ${response.statusCode}');
+//     }
+//   } catch (e) {
+//     print('Error fetching data from API detail_checklist_api: $e');
+//     return <DetailCheckList>[];
+//   }
+// }
 
 Future<bool> callSelectInsertApi(
     String idDanhmucChecklist, List<String> tags) async {
